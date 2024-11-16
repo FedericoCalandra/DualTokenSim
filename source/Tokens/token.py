@@ -19,7 +19,7 @@ class Token(ABC):
         """Control if two tokens are the same object."""
         return self is other_token
 
-    def increase_supply(self, amount):
+    def increase_supply(self, amount: int):
         """Increases the supply of a token.
         
         Args:
@@ -33,7 +33,7 @@ class Token(ABC):
         else:
             raise ValueError("Invalid amount. The amount of tokens to mint must be positive!")
 
-    def reduce_supply(self, amount):
+    def reduce_supply(self, amount: int):
         """Reduces the supply of a token.
         
         Args:
@@ -48,7 +48,7 @@ class Token(ABC):
             raise ValueError( "Invalid amount. The amount of tokens to burn must be positive \
                 and not greater than current supply.")
 
-    def set_new_price(self, new_price):
+    def set_new_price(self, new_price: float):
         """Sets a new price for the token.
         
         Args:

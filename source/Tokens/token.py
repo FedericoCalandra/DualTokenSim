@@ -1,18 +1,26 @@
 from abc import ABC, abstractmethod
 
 class Token(ABC):
-    def __init__(self, name, initial_supply, initial_price):
+    def __init__(self, name: str, initial_supply: int, initial_price: float):
         """Initializes the token with a name, initial supply, and initial price."""
-        self.name = name                # Token name (e.g., "Bitcoin")
-        self.supply = initial_supply     # Total supply of the token
-        self.price = initial_price       # Price of a single token
+        # Type checks
+        if not isinstance(name, str):
+            raise TypeError("The name must be a string.")
+        if not isinstance(initial_supply, int) or initial_supply <= 0:
+            raise ValueError("The initial supply must be a positive integer.")
+        if not isinstance(initial_price, (float, int)) or initial_price <= 0:
+            raise ValueError("The initial price must be a positive number.")
+        # Initializing the parameters of the abstract class Token.
+        self.name = name
+        self.supply = initial_supply
+        self.price = float(initial_price)  # Ensure price is always stored as a float
 
     def is_equal(self, other_token):
-        """Abstract method for comparing if two tokens are the same object."""
+        """Control if two tokens are the same object."""
         return self is other_token
 
     def increase_supply(self, amount):
-        """Increases the supply of tokens.
+        """Increases the supply of a token.
         
         Args:
             amount (int): The number of tokens to mint and add to the supply.
@@ -26,7 +34,7 @@ class Token(ABC):
             raise ValueError("Invalid amount. The amount of tokens to mint must be positive!")
 
     def reduce_supply(self, amount):
-        """Reduces the supply of tokens.
+        """Reduces the supply of a token.
         
         Args:
             amount (int): The number of tokens to remove from the supply.
@@ -37,9 +45,8 @@ class Token(ABC):
         if 0 < amount <= self.supply:
             self.supply -= amount
         else:
-            raise ValueError(
-                "Invalid amount. The amount of tokens to burn must be positive and not greater than current supply."
-            )
+            raise ValueError( "Invalid amount. The amount of tokens to burn must be positive \
+                and not greater than current supply.")
 
     def set_new_price(self, new_price):
         """Sets a new price for the token.

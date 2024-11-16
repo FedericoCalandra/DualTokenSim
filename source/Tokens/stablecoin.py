@@ -1,7 +1,8 @@
 from source.Tokens.token import Token
 
 class Stablecoin(Token):
-    def __init__(self, name: str, initial_supply: int, initial_price: float, peg: float = 1.0):
+    def __init__(self, name: str, initial_supply: int, initial_price: float, is_collateral: bool = False, \
+                 peg: float = 1.0):
         """
         Initializes a Stablecoin instance.
         
@@ -9,13 +10,14 @@ class Stablecoin(Token):
             name (str): The name of the stablecoin.
             initial_supply (int): The initial supply of the stablecoin.
             initial_price (float): The initial price of the stablecoin.
+            is_collateral (bool): Whether the stablecoin is used as collateral, default is False.
             peg (float): The value the stablecoin is pegged to, defaults to 1.0 (USD).
         
         Raises:
             ValueError: If the peg value is non-positive.
         """
         # Call the parent class constructor.
-        super().__init__(name, initial_supply, initial_price)
+        super().__init__(name, initial_supply, initial_price, is_collateral)
 
         # Validate the peg value.
         if peg <= 0:

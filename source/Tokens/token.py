@@ -61,3 +61,11 @@ class Token(ABC):
             self.price = new_price
         else:
             raise ValueError("Invalid price. Price must be positive.")
+        
+    @abstractmethod
+    def __repr__(self) -> str:
+        """
+        Abstract method for representing the token as a string.
+        Must be implemented by subclasses.
+        """
+        pass

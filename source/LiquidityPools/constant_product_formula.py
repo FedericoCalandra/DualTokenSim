@@ -29,6 +29,9 @@ class ConstantProductFormula(Formula):
         Explanation:
             The formula is derived from the invariant k = x * y. By adding input_quantity
             to input_reserve, we calculate the resulting output amount to satisfy the invariant.
+
+        Raises:
+            ValueError: If any of the arguments are not positive or if the output_quantity exceeds the output_reserve.
         """
         if input_quantity <= 0:
             raise ValueError("Input quantity must be positive.")
@@ -39,3 +42,38 @@ class ConstantProductFormula(Formula):
 
         output_amount = (output_reserve * input_quantity) / (input_reserve + input_quantity)
         return output_amount
+
+    def inverse_apply(self, output_quantity, input_reserve, output_reserve):
+        """
+        Calculates the input token amount required to achieve a desired output amount
+        using the constant product formula (CPF).
+
+        Args:
+            output_quantity (float): The desired amount of the output token to be swapped.
+            input_reserve (float): The current reserve of the input token in the pool.
+            output_reserve (float): The current reserve of the output token in the pool.
+
+        Returns:
+            float: The calculated amount of the input token needed for the swap, maintaining
+                   the constant product k = x * y.
+
+        Formula:
+            input_amount = (input_reserve * output_quantity) / (output_reserve - output_quantity)
+
+        Explanation:
+            The formula is derived from the invariant k = x * y. By reducing the output_reserve
+            by output_quantity, the input_amount is calculated to satisfy the constant product
+            formula while accounting for the desired output quantity.
+
+        Raises:
+            ValueError: If any of the arguments are not positive or if the output_quantity exceeds the output_reserve.
+        """
+        if output_quantity <= 0:
+            raise ValueError("Output quantity must be positive.")
+        if input_reserve <= 0:
+            raise ValueError("Input reserve must be positive.")
+        if output_reserve <= 0:
+            raise ValueError("Output reserve must be positive.")
+
+        intput_amount = (input_reserve * output_quantity) / (output_reserve - output_quantity)
+        return intput_amount

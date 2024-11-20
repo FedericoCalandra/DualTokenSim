@@ -84,6 +84,21 @@ class TestConstantProductFormula(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     self.formula.apply(input_qty, in_reserve, out_reserve)
 
+    def test_inverse_apply(self):
+        """Test the inverse formula application"""
+        # Arrange
+        input_reserve = 1000.0
+        output_reserve = 1000.0
+        output_quantity = 100.0
+
+        # Act
+        input_amount = self.formula.inverse_apply(output_quantity, input_reserve, output_reserve)
+
+        # Assert
+        initial_k = input_reserve * output_reserve
+        final_k = (input_reserve + input_amount) * (output_reserve - output_quantity)
+        self.assertAlmostEqual(initial_k, final_k, places=6)
+
 
 class TestLiquidityPool(unittest.TestCase):
     def setUp(self):

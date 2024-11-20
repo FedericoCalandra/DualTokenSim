@@ -65,7 +65,7 @@ class LiquidityPool:
         else:
             raise ValueError("Invalid input token for this liquidity pool.")
 
-        # Calculate output amount with fee applied
+        # Calculate output amount with fee applied and the swap commission
         output_amount = self.compute_swap_value(input_amount, input_reserve, output_reserve)
 
         # Update pool quantities based on the swap

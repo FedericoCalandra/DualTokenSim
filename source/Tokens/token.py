@@ -1,91 +1,77 @@
 from abc import ABC, abstractmethod
 
 class Token(ABC):
-    def __init__(self, name: str, initial_supply: int, initial_price: float, is_collateral: bool = False):
+    """
+    Abstract class representing a generic token.
+    
+    Attributes:
+        name (str): The name of the token.
+        supply (int): The current supply of the token.
+        price (float): The current price of the token.
+    """
+    
+    def __init__(self, name: str, initial_supply: int, initial_price: float):
         """
-        Initializes the token with a name, initial supply, initial price, and collateral status.
+        Initializes an instance of the Token class with the provided values.
         
         Args:
             name (str): The name of the token.
-            initial_supply (int): The initial supply of the token.
-            initial_price (float): The initial price of the token.
-            is_collateral (bool): Whether the token is used as collateral, default is False.
+            initial_supply (int): The initial supply of the token. Must be a positive integer.
+            initial_price (float): The initial price of the token. Must be a positive number.
+        
+        Raises:
+            TypeError: If the name is not a string.
+            ValueError: If the initial supply is not a positive integer or 
+                        if the initial price is not a positive number.
         """
-        # Type checks
+        # Argument validation
         if not isinstance(name, str):
-            raise TypeError("The name must be a string.")
+            raise TypeError("The token name must be a string.")
         if not isinstance(initial_supply, int) or initial_supply <= 0:
             raise ValueError("The initial supply must be a positive integer.")
         if not isinstance(initial_price, (float, int)) or initial_price <= 0:
             raise ValueError("The initial price must be a positive number.")
-        if not isinstance(is_collateral, bool):
-            raise TypeError("is_collateral must be a boolean.")
-        # Initializing the parameters of the abstract class Token.
+        
+        # Initialize attributes
         self.name = name
         self.supply = initial_supply
-        self.price = float(initial_price)  # Ensure price is always stored as a float.
-        self._is_collateral = is_collateral
-    
-    @property
-    def is_collateral(self):
-        return self._is_collateral
+        self.price = float(initial_price)  # Ensure the price is always stored as a float.
 
-    @is_collateral.setter
-    def is_collateral(self, value: bool):
-        # Imposta il valore dell'attributo interno
-        raise AttributeError("The value of the attribute is_collateral can't be modified!")
-
-    def is_equal(self, other_token):
-        """Control if two tokens are the same object."""
+    def is_equal(self, other_token) -> bool:
+        """
+        Checks if two tokens are the same object (instance identity).
+        
+        Args:
+            other_token (Token): Another token object to compare.
+        
+        Returns:
+            bool: True if the two tokens are the same object, False otherwise.
+        """
         return self is other_token
 
-    def increase_supply(self, amount: int):
-        """Increases the supply of a token.
-        
-        Args:
-            amount (int): The number of tokens to mint and add to the supply.
-        
-        Raises:
-            ValueError: If the amount is non-positive.
-        """
-        if amount > 0:
-            self.supply += amount
-        else:
-            raise ValueError("Invalid amount. The amount of tokens to mint must be positive!")
-
-    def reduce_supply(self, amount: int):
-        """Reduces the supply of a token.
-        
-        Args:
-            amount (int): The number of tokens to remove from the supply.
-        
-        Raises:
-            ValueError: If the amount is non-positive or greater than current supply.
-        """
-        if 0 < amount <= self.supply:
-            self.supply -= amount
-        else:
-            raise ValueError( "Invalid amount. The amount of tokens to burn must be positive \
-                and not greater than current supply.")
-
     def set_new_price(self, new_price: float):
-        """Sets a new price for the token.
+        """
+        Sets a new price for the token.
         
         Args:
             new_price (float): The new price of the token.
         
         Raises:
-            ValueError: If the new price is non-positive.
+            ValueError: If the new price is not a positive number.
         """
         if new_price > 0:
-            self.price = new_price
+            self.price = float(new_price)
         else:
-            raise ValueError("Invalid price. Price must be positive.")
+            raise ValueError("Invalid price. The price must be a positive number.")
         
     @abstractmethod
     def __repr__(self) -> str:
         """
         Abstract method for representing the token as a string.
-        Must be implemented by subclasses.
+        This method must be implemented by subclasses.
+        
+        Returns:
+            str: The textual representation of the token.
         """
         pass
+

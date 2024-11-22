@@ -7,19 +7,17 @@ class ImprovedVirtualLiquidityPool(VirtualLiquidityPool):
     that includes restore_values to adjust delta dynamically.
     """
 
-    def __init__(self, stablecoin, collateral, quantity_stablecoin, quantity_collateral, fee, formula,
-                 price_collateral, price_stablecoin, pool_recovery_period):
+    def __init__(self, stablecoin, collateral, stablecoin_base_quantity, fee, formula, pool_recovery_period):
         """
         Initializes the improved virtual liquidity pool with restore_values.
 
         Args:
             pool_recovery_period (int): The recovery period for the pool.
         """
-        super().__init__(stablecoin, collateral, quantity_stablecoin, quantity_collateral, fee, formula,
-                         price_collateral)
+        super().__init__(stablecoin, collateral, stablecoin_base_quantity, fee, formula)
         self.pool_recovery_period = pool_recovery_period
         self.restore_values = [0] * pool_recovery_period
-        self.stablecoin_price = price_stablecoin
+        self.stablecoin_price = stablecoin.price
         self.values = [0.95 + i * 0.005 for i in range(9)]  # Thresholds: [0.95, 0.955, ..., 0.990]
 
     def restore_delta(self):

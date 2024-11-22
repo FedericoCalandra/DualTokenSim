@@ -6,15 +6,6 @@ from source.Tokens.algorithmic_stablecoin import AlgorithmicStablecoin
 from source.Tokens.collateral_token import CollateralToken
 
 
-class MockToken:
-    def __init__(self, name, supply):
-        self.name = name
-        self.supply = supply
-
-    def is_equal(self, other_token):
-        return self.name == other_token.name and self.supply == other_token.supply
-
-
 class TestSimpleVirtualLiquidityPool(unittest.TestCase):
     def setUp(self):
         """

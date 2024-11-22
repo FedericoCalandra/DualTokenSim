@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 
+from source.LiquidityPools.formula import Formula
 from source.LiquidityPools.liquidity_pool import LiquidityPool
+from source.Tokens.token import Token
 
 
 class VirtualLiquidityPool(LiquidityPool, ABC):
@@ -20,8 +22,8 @@ class VirtualLiquidityPool(LiquidityPool, ABC):
         update_token_b_price: Updates the price_token_b attribute with the provided value.
     """
 
-    def __init__(self, stablecoin, collateral, quantity_stablecoin, quantity_collateral, fee, formula,
-                 collateral_price):
+    def __init__(self, stablecoin: Token, collateral: Token, stablecoin_base_quantity: float, fee: float,
+                 formula: Formula):
         """
         Initializes the VirtualLiquidityPool with tokens, their quantities, a transaction fee,
         a swap formula, and parameters for managing token_b's price and deviation.
@@ -29,16 +31,18 @@ class VirtualLiquidityPool(LiquidityPool, ABC):
         Args:
             stablecoin (Token): The first token in the pool.
             collateral (Token): The second token in the pool.
-            quantity_stablecoin (float): Initial quantity of token_a in the pool.
-            quantity_collateral (float): Initial quantity of token_b in the pool.
+            stablecoin_base_quantity (float): Initial quantity of stablecoin in the pool.
             fee (float): Transaction fee percentage applied to swaps.
             formula (Formula): Formula instance defining the swap computation logic.
             collateral_price (float): Initial reference price of the collateral token.
         """
-        quantity_collateral = quantity_collateral / collateral_price
-        super().__init__(stablecoin, collateral, quantity_stablecoin, quantity_collateral, fee, formula)
-        self.stablecoin_base_quantity = quantity_stablecoin
-        self.collateral_price = collateral_price
+        if stablecoin_base_quantity < 0 or fee < 0:
+            raise ValueError("Invalid inputs for this virtual liquidity pool.")
+
+        quantity_collateral = stablecoin_base_quantity / collateral.price
+        super().__init__(stablecoin, collateral, stablecoin_base_quantity, quantity_collateral, fee, formula)
+        self.stablecoin_base_quantity = stablecoin_base_quantity
+        self.collateral_price = collateral.price
         self.delta = 0
 
     def swap(self, input_token, input_amount):
@@ -75,7 +79,7 @@ class VirtualLiquidityPool(LiquidityPool, ABC):
                                                              new_quantity_token_a)
         self.quantity_token_a = new_quantity_token_a
 
-    def restore_to_equilibrium_mechanism(self):
+    def perform_pool_replenishing(self):
         """
         Coordinates the restoration mechanism of the virtual liquidity pool.
         It depends on the abstract restore_delta method.

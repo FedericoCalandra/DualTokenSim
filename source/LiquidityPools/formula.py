@@ -66,9 +66,9 @@ class Formula(ABC):
         """
         if input_reserve > new_input_reserve:
             obtained_quantity = input_reserve - new_input_reserve
-            new_output_quantity = self.inverse_apply(obtained_quantity, input_reserve, output_reserve)
+            new_output_quantity = output_reserve + self.inverse_apply(obtained_quantity, output_reserve, input_reserve)
         else:
             obtained_quantity = new_input_reserve - input_reserve
-            new_output_quantity = self.apply(obtained_quantity, input_reserve, output_reserve)
+            new_output_quantity = output_reserve - self.apply(obtained_quantity, input_reserve, output_reserve)
 
         return new_output_quantity

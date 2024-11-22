@@ -7,9 +7,14 @@ class SimpleVirtualLiquidityPool(VirtualLiquidityPool):
     This is directly inspired by the original virtual liquidity pool implemented in the Terra protocol.
     """
 
-    def __init__(self, stablecoin, collateral, quantity_stablecoin, quantity_collateral, fee, formula, collateral_price,
-                 pool_recovery_period):
-        super().__init__(stablecoin, collateral, quantity_stablecoin, quantity_collateral, fee, formula, collateral_price)
+    def __init__(self, stablecoin, collateral, stablecoin_base_quantity, fee, formula, pool_recovery_period):
+        """
+        Initializes the simple virtual liquidity pool with restore_values.
+
+        Args:
+            pool_recovery_period (int): The recovery period for the pool.
+        """
+        super().__init__(stablecoin, collateral, stablecoin_base_quantity, fee, formula)
         self.pool_recovery_period = pool_recovery_period
 
     def restore_delta(self):

@@ -2,15 +2,8 @@ import unittest
 from source.LiquidityPools.constant_product_formula import ConstantProductFormula
 from source.LiquidityPools.improved_virtual_liquidity_pool import ImprovedVirtualLiquidityPool
 from source.LiquidityPools.simple_virtual_liquidity_pool import SimpleVirtualLiquidityPool
-
-
-class MockToken:
-    def __init__(self, name, supply):
-        self.name = name
-        self.supply = supply
-
-    def is_equal(self, other_token):
-        return self.name == other_token.name and self.supply == other_token.supply
+from source.Tokens.algorithmic_stablecoin import AlgorithmicStablecoin
+from source.Tokens.collateral_token import CollateralToken
 
 
 class TestSimpleVirtualLiquidityPool(unittest.TestCase):
@@ -18,18 +11,16 @@ class TestSimpleVirtualLiquidityPool(unittest.TestCase):
         """
         Initialize a test instance of SimpleVirtualLiquidityPool with valid values.
         """
-        stablecoin = MockToken("Stablecoin", 1000000)
-        collateral = MockToken("Collateral", 1000000)
+        stablecoin = AlgorithmicStablecoin("Stablecoin", 1000000, 1.0)
+        collateral = CollateralToken("Collateral", 1000000, 5.0)
         formula = ConstantProductFormula()
 
         self.pool = SimpleVirtualLiquidityPool(
             stablecoin=stablecoin,
             collateral=collateral,
-            quantity_stablecoin=1000,
-            quantity_collateral=2000,
+            stablecoin_base_quantity=1000,
             fee=0.003,
             formula=formula,
-            collateral_price=5.0,
             pool_recovery_period=10
         )
 
@@ -44,7 +35,7 @@ class TestSimpleVirtualLiquidityPool(unittest.TestCase):
         """
         Test restore_delta reduces delta as expected in normal conditions.
         """
-        self.pool.delta = 100
+        self.pool.delta = 100.0
         self.pool.restore_delta()
         expected_delta = 100 * (1 - 1 / self.pool.pool_recovery_period)
         self.assertAlmostEqual(self.pool.delta, expected_delta, places=5)
@@ -80,37 +71,49 @@ class TestSimpleVirtualLiquidityPool(unittest.TestCase):
         self.pool.reset_replenishing_system()
         self.assertEqual(self.pool.delta, 0)
 
-    # def test_invalid_initialization(self):
-    #     """
-    #     Ensure invalid inputs for collateral_price raise exceptions.
-    #     """
-    #     with self.assertRaises(ValueError):
-    #         SimpleVirtualLiquidityPool(
-    #             stablecoin=None,
-    #             collateral=None,
-    #             quantity_stablecoin=1000,
-    #             quantity_collateral=2000,
-    #             fee=0.003,
-    #             formula=None,
-    #             collateral_price=10.0,
-    #             pool_recovery_period=10
-    #         )
+    def test_invalid_initialization(self):
+        """
+        Ensure invalid inputs for collateral_price raise exceptions.
+        """
+        with self.assertRaises(ValueError):
+            SimpleVirtualLiquidityPool(
+                stablecoin=AlgorithmicStablecoin("Stablecoin", 1000000, 1.0),
+                collateral=CollateralToken("Collateral", 1000000, 5.0),
+                stablecoin_base_quantity=-10,
+                fee=-1.0,
+                formula=ConstantProductFormula(),
+                pool_recovery_period=0
+            )
 
-    def test_swap_stablecoin_for_collateral(self):
+    def test_swap_stablecoin_for_collateral_and_replenishing_mechanism(self):
         """
         Test stablecoin swap adjusts delta as expected.
         """
         self.pool.delta = 0
-        self.pool.swap(self.pool.token_a, 10)
+        stablecoin_quantity = self.pool.stablecoin_base_quantity
+        initial_collateral_quantity = self.pool.quantity_token_b
+        token, obtained_collateral_quantity = self.pool.swap(self.pool.token_a, 10.0)
         self.assertEqual(self.pool.delta, 10.0)
+        self.assertEqual(self.pool.quantity_token_a, stablecoin_quantity + 10.0)
+        self.pool.perform_pool_replenishing()
+        self.assertAlmostEqual(self.pool.quantity_token_a, stablecoin_quantity + 9.0, places=1)
+        self.assertAlmostEqual(self.pool.quantity_token_b,
+                               initial_collateral_quantity - obtained_collateral_quantity * 0.9, places=1)
 
     def test_swap_collateral_for_stablecoin(self):
         """
         Test collateral swap adjusts delta as expected.
         """
         self.pool.delta = 0
-        token, obtained_stablecoin_quantity = self.pool.swap(self.pool.token_b, 10)
+        stablecoin_quantity = self.pool.stablecoin_base_quantity
+        initial_collateral_quantity = self.pool.quantity_token_b
+        token, obtained_stablecoin_quantity = self.pool.swap(self.pool.token_b, 10.0)
         self.assertEqual(self.pool.delta, -obtained_stablecoin_quantity)
+        self.assertEqual(self.pool.quantity_token_b, initial_collateral_quantity + 10.0)
+        self.pool.perform_pool_replenishing()
+        self.assertAlmostEqual(self.pool.quantity_token_a, stablecoin_quantity - obtained_stablecoin_quantity * 0.9,
+                               places=1)
+        self.assertAlmostEqual(self.pool.quantity_token_b, initial_collateral_quantity + 9.0, places=1)
 
 
 class TestImprovedVirtualLiquidityPool(unittest.TestCase):
@@ -118,19 +121,16 @@ class TestImprovedVirtualLiquidityPool(unittest.TestCase):
         """
         Sets up an instance of ImprovedVirtualLiquidityPool for testing.
         """
-        stablecoin = MockToken("Stablecoin", 1000000)
-        collateral = MockToken("Collateral", 1000000)
+        stablecoin = AlgorithmicStablecoin("Stablecoin", 1000000, 1.0)
+        collateral = CollateralToken("Collateral", 1000000, 5.0)
         formula = ConstantProductFormula()
 
         self.pool = ImprovedVirtualLiquidityPool(
             stablecoin=stablecoin,
             collateral=collateral,
-            quantity_stablecoin=500000,
-            quantity_collateral=500000,
+            stablecoin_base_quantity=1000,
             fee=0.003,
             formula=formula,
-            price_collateral=10.0,
-            price_stablecoin=1.0,
             pool_recovery_period=10
         )
 
@@ -139,7 +139,7 @@ class TestImprovedVirtualLiquidityPool(unittest.TestCase):
         Verify that the pool initializes with correct attributes, including restore_values.
         """
         self.assertEqual(self.pool.delta, 0)
-        self.assertEqual(self.pool.collateral_price, 10.0)
+        self.assertEqual(self.pool.collateral_price, 5.0)
         self.assertEqual(self.pool.restore_values, [0] * self.pool.pool_recovery_period)
 
     def test_restore_delta_normal(self):
@@ -231,21 +231,49 @@ class TestImprovedVirtualLiquidityPool(unittest.TestCase):
         new_length = self.pool.compute_restore_values_new_length()
         self.assertEqual(new_length, 1, "New length should be 1 when price is exactly on the first threshold.")
 
-    def test_swap_stablecoin_for_collateral(self):
+    def test_invalid_initialization(self):
         """
-        Test swap adjusts delta as expected.
+        Ensure invalid inputs for collateral_price raise exceptions.
+        """
+        with self.assertRaises(ValueError):
+            ImprovedVirtualLiquidityPool(
+                stablecoin=AlgorithmicStablecoin("Stablecoin", 1000000, 1.0),
+                collateral=CollateralToken("Collateral", 1000000, 5.0),
+                stablecoin_base_quantity=-10,
+                fee=-1.0,
+                formula=ConstantProductFormula(),
+                pool_recovery_period=0
+            )
+
+    def test_swap_stablecoin_for_collateral_and_replenishing_mechanism(self):
+        """
+        Test stablecoin swap adjusts delta as expected.
         """
         self.pool.delta = 0
-        self.pool.swap(self.pool.token_a, 10)
+        stablecoin_quantity = self.pool.stablecoin_base_quantity
+        initial_collateral_quantity = self.pool.quantity_token_b
+        token, obtained_collateral_quantity = self.pool.swap(self.pool.token_a, 10.0)
         self.assertEqual(self.pool.delta, 10.0)
+        self.assertEqual(self.pool.quantity_token_a, stablecoin_quantity + 10.0)
+        self.pool.perform_pool_replenishing()
+        self.assertAlmostEqual(self.pool.quantity_token_a, stablecoin_quantity + 9.0, places=1)
+        self.assertAlmostEqual(self.pool.quantity_token_b,
+                               initial_collateral_quantity - obtained_collateral_quantity * 0.9, places=1)
 
     def test_swap_collateral_for_stablecoin(self):
         """
         Test collateral swap adjusts delta as expected.
         """
         self.pool.delta = 0
-        token, obtained_stablecoin_quantity = self.pool.swap(self.pool.token_b, 10)
+        stablecoin_quantity = self.pool.stablecoin_base_quantity
+        initial_collateral_quantity = self.pool.quantity_token_b
+        token, obtained_stablecoin_quantity = self.pool.swap(self.pool.token_b, 10.0)
         self.assertEqual(self.pool.delta, -obtained_stablecoin_quantity)
+        self.assertEqual(self.pool.quantity_token_b, initial_collateral_quantity + 10.0)
+        self.pool.perform_pool_replenishing()
+        self.assertAlmostEqual(self.pool.quantity_token_a, stablecoin_quantity - obtained_stablecoin_quantity * 0.9,
+                               places=1)
+        self.assertAlmostEqual(self.pool.quantity_token_b, initial_collateral_quantity + 9.0, places=1)
 
 
 if __name__ == "__main__":

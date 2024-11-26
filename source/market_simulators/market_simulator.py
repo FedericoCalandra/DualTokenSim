@@ -20,6 +20,7 @@ class MarketSimulator(ABC):
         purchase_generators (List[PurchaseGenerator]): List of purchase generator instances for simulating purchases.
         total_free_stablecoin_supply (float): Total free supply of stablecoins available in the simulation.
         total_free_collateral_supply (float): Total free supply of collateral tokens available in the simulation.
+        total_free_reference_supply (float): Total free supply of reference tokens available in the simulation.
     """
 
     def __init__(self,
@@ -29,7 +30,8 @@ class MarketSimulator(ABC):
                  wallets_generators: List[WalletsGenerator],
                  purchase_generators: List[PurchaseGenerator],
                  total_free_stablecoin_supply: float,
-                 total_free_collateral_supply: float):
+                 total_free_collateral_supply: float,
+                 total_free_reference_supply: float):
         """
         Initializes the MarketSimulator with the provided attributes.
 
@@ -41,6 +43,7 @@ class MarketSimulator(ABC):
             purchase_generators (List[PurchaseGenerator]): List of purchase generator instances.
             total_free_stablecoin_supply (float): Total stablecoin supply available.
             total_free_collateral_supply (float): Total collateral token supply available.
+            total_free_reference_supply (float): Total reference token supply available.
         """
         self.volatility = volatility
         self.liquidity_pools = liquidity_pools
@@ -49,6 +52,7 @@ class MarketSimulator(ABC):
         self.purchase_generators = purchase_generators
         self.total_free_stablecoin_supply = total_free_stablecoin_supply
         self.total_free_collateral_supply = total_free_collateral_supply
+        self.total_free_reference_supply = total_free_reference_supply
 
     @abstractmethod
     def random_purchases(self) -> None:

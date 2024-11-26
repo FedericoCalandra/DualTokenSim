@@ -7,6 +7,7 @@ class Token(ABC):
     Attributes:
         name (str): The name of the token.
         supply (int): The current supply of the token.
+        free_supply(int): The amount of tokens present in users' wallets.
         price (float): The current price of the token.
     """
     
@@ -36,6 +37,31 @@ class Token(ABC):
         self.name = name
         self.supply = initial_supply
         self.price = float(initial_price)  # Ensure the price is always stored as a float.
+        self._free_supply = initial_supply # Use a private attribute for internal storage.
+
+    @property
+    def free_supply(self):
+        """Getter for the free supply of tokens."""
+        return self._free_supply
+
+    @free_supply.setter
+    def free_supply(self, value):
+        """
+        Setter for the free supply of tokens with validation.
+        
+        Ensures that free_supply cannot exceed the total supply.
+        
+        Args:
+            value (int): The new value for free_supply.
+        
+        Raises:
+            ValueError: If value is greater than supply or negative.
+        """
+        if not isinstance(value, int) or value < 0:
+            raise ValueError("Free supply must be a non-negative integer.")
+        if value > self.supply:
+            raise ValueError("Free supply cannot exceed total supply.")
+        self._free_supply = value
 
     def is_equal(self, other_token) -> bool:
         """

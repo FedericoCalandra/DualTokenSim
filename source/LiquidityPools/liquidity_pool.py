@@ -68,13 +68,19 @@ class LiquidityPool:
         # Calculate output amount with fee applied and the swap commission
         output_amount = self.compute_swap_value(input_amount, input_reserve, output_reserve)
 
-        # Update pool quantities based on the swap
+        # Update pool quantities end free token quantities based on the swap
         if input_token.is_equal(self.token_a):
             self.quantity_token_a += input_amount
+            self.token_a.free_supply -= input_amount
+
             self.quantity_token_b -= output_amount
+            self.token_b.free_supply += output_amount
         else:
             self.quantity_token_b += input_amount
+            self.token_b.free_supply -= input_amount
+
             self.quantity_token_a -= output_amount
+            self.token_a.free_supply += output_amount
 
         return output_token, output_amount
 

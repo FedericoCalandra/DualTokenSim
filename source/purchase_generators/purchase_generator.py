@@ -1,4 +1,7 @@
 from abc import ABC, abstractmethod
+from typing import Tuple
+
+from source.Tokens.token import Token
 
 
 class PurchaseGenerator(ABC):
@@ -20,7 +23,7 @@ class PurchaseGenerator(ABC):
         self.liquidity_pool = liquidity_pool
 
     @abstractmethod
-    def generate_random_purchase(self):
+    def generate_random_purchase(self) -> Tuple[Token, float]:
         """
         Abstract method to generate a random purchase event.
 

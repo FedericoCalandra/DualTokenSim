@@ -8,7 +8,8 @@ class GenericToken(Token):
     
     Attributes:
         name (str): The name of the GenericToken.
-        supply (int): The current supply of the token.
+        supply (float): The current supply of the token.
+        free_supply (float): The amount of tokens present in users' wallets.
         price (float): The current price of the token.
     """
 
@@ -18,29 +19,11 @@ class GenericToken(Token):
         
         Args:
             name (str): The name of the GenericToken.
-            initial_supply (int): The initial supply of the token. Should be a positive integer.
+            initial_supply (float): The initial supply of the token. Should be a positive number.
             initial_price (float): The initial price of the token. Should be a positive number.
-        
-        Raises:
-            ValueError: If the initial supply or price is invalid (non-positive).
         """
         # Initialize using the parent class constructor
-        super().__init__(name=name, initial_supply=initial_supply, initial_price=initial_price)
-
-    def change_supply(self, delta: int):
-        """
-        Increases or decreases the supply of the token by the specified delta.
-        
-        Args:
-            delta (int): The amount to increase or decrease the supply by. Can be positive or negative.
-        
-        Raises:
-            ValueError: If the new supply after applying delta is negative.
-        """
-        new_supply = self.supply + delta
-        if new_supply < 0:
-            raise ValueError("Supply cannot be negative.")
-        self.supply = new_supply
+        super().__init__(name, initial_supply, initial_price)
 
     def __repr__(self) -> str:
         """

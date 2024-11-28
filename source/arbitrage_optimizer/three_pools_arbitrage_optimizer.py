@@ -23,7 +23,7 @@ class ThreePoolsArbitrageOptimizer(ArbitrageOptimizer):
             virtual_liquidity_pool (VirtualLiquidityPool): A virtual liquidity pool used for swaps between AS and CT.
         """
         super().__init__(liquidity_pools, virtual_liquidity_pool)
-        self.max_arbitrage_input = 10 ^ 6
+        self.max_arbitrage_input = 10 ** 6
         self.threshold = 0.001
 
     def leverage_arbitrage_opportunity(self):
@@ -109,8 +109,8 @@ class ThreePoolsArbitrageOptimizer(ArbitrageOptimizer):
         Calculates the profit from an arbitrage operation based on the input quantity and arbitrage type.
 
         The arbitrage process involves:
-        - Type 1: Buying AS in Pool 1, swapping AS for CT in the virtual pool, and selling CT in Pool 2.
-        - Type 2: Buying CT in Pool 2, swapping CT for AS in the virtual pool, and selling AS in Pool 1.
+        - Type 1: Buying CT in Pool 2, swapping CT for AS in the virtual pool, and selling AS in Pool 1.
+        - Type 2: Buying AS in Pool 1, swapping AS for CT in the virtual pool, and selling CT in Pool 2.
 
         Args:
             arbitrage_type (str): The arbitrage type ('Type 1' or 'Type 2').
@@ -123,11 +123,11 @@ class ThreePoolsArbitrageOptimizer(ArbitrageOptimizer):
             If the input quantity is zero or invalid, returns 0 profit.
         """
         if arbitrage_type == "Type 1":
-            first_pool = self.liquidity_pools[0]
-            second_pool = self.liquidity_pools[1]
-        else:
             first_pool = self.liquidity_pools[1]
             second_pool = self.liquidity_pools[0]
+        else:
+            first_pool = self.liquidity_pools[0]
+            second_pool = self.liquidity_pools[1]
 
         if rt_input_quantity > 0:
             x = first_pool.compute_swap_value(rt_input_quantity,
@@ -136,12 +136,12 @@ class ThreePoolsArbitrageOptimizer(ArbitrageOptimizer):
 
             if arbitrage_type == "Type 1":
                 y = self.virtual_liquidity_pool.compute_swap_value(x,
-                                                                   self.virtual_liquidity_pool.quantity_token_a,
-                                                                   self.virtual_liquidity_pool.quantity_token_b)
-            else:
-                y = self.virtual_liquidity_pool.compute_swap_value(x,
                                                                    self.virtual_liquidity_pool.quantity_token_b,
                                                                    self.virtual_liquidity_pool.quantity_token_a)
+            else:
+                y = self.virtual_liquidity_pool.compute_swap_value(x,
+                                                                   self.virtual_liquidity_pool.quantity_token_a,
+                                                                   self.virtual_liquidity_pool.quantity_token_b)
             rt_output_quantity = second_pool.compute_swap_value(y,
                                                                 second_pool.quantity_token_a,
                                                                 second_pool.quantity_token_b)

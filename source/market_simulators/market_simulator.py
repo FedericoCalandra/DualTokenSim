@@ -3,7 +3,6 @@ from source.LiquidityPools.liquidity_pool import LiquidityPool
 from source.LiquidityPools.virtual_liquidity_pool import VirtualLiquidityPool
 from source.arbitrage_optimizer.arbitrage_optimizer import ArbitrageOptimizer
 from source.purchase_generators.purchase_generator import PurchaseGenerator
-from source.wallets_generators.wallets_generator import WalletsGenerator
 
 
 class MarketSimulator:
@@ -12,41 +11,46 @@ class MarketSimulator:
     exchanges, and arbitrage activities.
 
     Attributes:
-        volatility (List[float]): Array representing market volatility values affecting conditions.
         liquidity_pools (List[LiquidityPool]): List of liquidity pool instances managing token exchanges.
         virtual_liquidity_pool (VirtualLiquidityPool): Instance of a virtual liquidity pool for managing price deltas.
-        wallets_generators (List[WalletsGenerator]): List of wallet generator instances for simulating user wallets.
         purchase_generators (List[PurchaseGenerator]): List of purchase generator instances for simulating purchases.
         arbitrage_optimizer (ArbitrageOptimizer): Instance responsible for detecting and executing arbitrage
             opportunities across the liquidity pools.
     """
 
     def __init__(self,
-                 volatility: List[float],
                  liquidity_pools: List[LiquidityPool],
                  virtual_liquidity_pool: VirtualLiquidityPool,
-                 wallets_generators: List[WalletsGenerator],
                  purchase_generators: List[PurchaseGenerator],
                  arbitrage_optimizer: ArbitrageOptimizer):
         """
         Initializes the MarketSimulator with the provided attributes.
 
         Args:
-            volatility (List[float]): Market volatility values.
             liquidity_pools (List[LiquidityPool]): List of liquidity pool instances.
             virtual_liquidity_pool (VirtualLiquidityPool): Virtual liquidity pool instance.
-            wallets_generators (List[WalletsGenerator]): List of wallet generator instances.
             purchase_generators (List[PurchaseGenerator]): List of purchase generator instances.
             arbitrage_optimizer (ArbitrageOptimizer): Arbitrage optimizer instance for handling arbitrage operations.
         """
-        self.volatility = volatility
+        if not isinstance(liquidity_pools, list) or not all(isinstance(lp, LiquidityPool) for lp in liquidity_pools):
+            raise ValueError("liquidity_pools must be a list of LiquidityPool instances.")
+
+        if not isinstance(virtual_liquidity_pool, VirtualLiquidityPool):
+            raise ValueError("virtual_liquidity_pool must be an instance of VirtualLiquidityPool.")
+
+        if not isinstance(purchase_generators, list) or not all(
+                isinstance(pg, PurchaseGenerator) for pg in purchase_generators):
+            raise ValueError("purchase_generators must be a list of PurchaseGenerator instances.")
+
+        if not isinstance(arbitrage_optimizer, ArbitrageOptimizer):
+            raise ValueError("arbitrage_optimizer must be an instance of ArbitrageOptimizer.")
+
         self.liquidity_pools = liquidity_pools
         self.virtual_liquidity_pool = virtual_liquidity_pool
-        self.wallets_generators = wallets_generators
         self.purchase_generators = purchase_generators
         self.arbitrage_optimizer = arbitrage_optimizer
 
-    def random_purchases(self) -> None:
+    def execute_random_purchases(self) -> None:
         """
         Simulates random purchase activities across liquidity pools in the market and evaluates arbitrage opportunities.
 

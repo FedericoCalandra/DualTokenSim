@@ -28,10 +28,6 @@ class ExponentialWalletsGenerator(WalletsGenerator):
             ValueError: If total_free_token_supply is non-positive or the probability is not in (0, 1).
         """
         super().__init__(probability_associated_to_total_free_token)
-        if not (0 < probability_associated_to_total_free_token < 1):
-            raise ValueError("min_probability_associated_to_total_free_token must be between 0 and 1.")
-
-        self.probability_associated_to_total_free_token = probability_associated_to_total_free_token
 
     def get_random_wallet(self, total_free_token_supply):
         """

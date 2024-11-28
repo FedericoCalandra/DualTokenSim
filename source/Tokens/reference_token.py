@@ -10,6 +10,7 @@ class ReferenceToken(Token):
         name (str): The name of the ReferenceToken.
         price (float): Fixed price, always set to 1.0.
         supply (float): Set to infinity to indicate that supply is undefined.
+        free_supply (float): Set to infinity to indicate that free supply is undefined.
     """
     
     def __init__(self, name: str):
@@ -20,20 +21,24 @@ class ReferenceToken(Token):
         Args:
             name (str): The name of the ReferenceToken.
         """
-        # Call the parent constructor with a fixed price of 1.0 and infinite supply
-        super().__init__(name=name, initial_supply=float('inf'), initial_price=1.0)
+        # Call the parent constructor with a fixed price of 1.0 and infinite supply.
+        super().__init__(name, float('inf'), 1.0)
 
-    def set_new_price(self, new_price: float):
-        """
-        Prevents the price of the ReferenceToken from being changed.
-        
-        Args:
-            new_price (float): The new price to be set (ignored).
-        
-        Raises:
-            ValueError: Always, because the price of a ReferenceToken is fixed at 1.0.
-        """
-        raise ValueError("The price of a ReferenceToken is fixed at 1.0 and cannot be changed.")
+    @property
+    def price(self):
+        """The price of the ReferenceToken (always 1.0)."""
+        return 1.0
+
+    @property
+    def supply(self):
+        """The total supply of the ReferenceToken (always inf)."""
+        return float('inf')
+
+    @property
+    def free_supply(self):
+        """The free supply of the ReferenceToken (always inf)."""
+        return float('inf')
+
 
     def __repr__(self) -> str:
         """

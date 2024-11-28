@@ -77,10 +77,10 @@ class LiquidityPool:
             self.token_b.free_supply += output_amount
         else:
             self.quantity_token_b += input_amount
-            self.token_b.free_supply -= input_amount
+            self.token_b.free_supply(self.token_b.free_supply() - input_token)
 
             self.quantity_token_a -= output_amount
-            self.token_a.free_supply += output_amount
+            self.token_a.free_supply(self.token_a.free_supply() + output_amount)
 
         return output_token, output_amount
 

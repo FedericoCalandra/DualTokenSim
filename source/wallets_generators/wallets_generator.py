@@ -23,8 +23,8 @@ class WalletsGenerator(ABC):
         Raises:
             ValueError: If total_free_token_supply is not positive.
         """
-        if probability_associated_to_total_free_token < 0:
-            raise ValueError("Probability associated to total free token supply must be a non-negative value.")
+        if not (0 < probability_associated_to_total_free_token < 1):
+            raise ValueError("probability_associated_to_total_free_token must be between 0 and 1.")
 
         self.probability_associated_to_total_free_token = probability_associated_to_total_free_token
 

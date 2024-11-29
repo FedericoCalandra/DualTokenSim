@@ -35,7 +35,7 @@ class SeignorageModelToken(Token, ABC):
         # Initialize the parent Token class
         super().__init__(name, initial_supply, initial_free_supply, initial_price)
 
-    def mint(self, amount: float):
+    def mint(self, amount_to_mint: float):
         """
         This method is essential for increasing the supply of the token in order to stabilize the system.
 
@@ -44,13 +44,13 @@ class SeignorageModelToken(Token, ABC):
         Raises:
             ValueError: If the amount is negative.
         """
-        if amount <= 0:
+        if amount_to_mint <= 0:
             raise ValueError("Amount to mint must be positive.")
         # The parent class setter is invoked to ensure the free_supply attribute is
         # consistent with the change in the total supply.
-        self.supply += amount
+        self.supply += amount_to_mint
 
-    def burn(self, amount: float):
+    def burn(self, amount_to_burn: float):
         """
         This method is essential for decreasing the supply of the token in order to stabilize the system 
         and prevent the price from falling too low.
@@ -61,13 +61,13 @@ class SeignorageModelToken(Token, ABC):
         Raises:
             ValueError: If the amount is negative or greater than the current supply.
         """
-        if amount <= 0:
+        if amount_to_burn <= 0:
             raise ValueError("Amount to burn must be positive.")
-        if amount > self.supply:
+        if amount_to_burn > self.supply:
             raise ValueError("Cannot burn more tokens than the current supply.")
         # The parent class setter is invoked to ensure the free_supply attribute is
         # consistent with the change in the total supply.
-        self.supply -= amount
+        self.supply -= amount_to_burn
 
     @abstractmethod
     def __repr__(self) -> str:

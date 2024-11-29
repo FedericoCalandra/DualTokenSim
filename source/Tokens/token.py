@@ -99,23 +99,23 @@ class Token(ABC):
         self._supply = float(new_supply)
 
     @free_supply.setter
-    def free_supply(self, value: float):
+    def free_supply(self, new_free_supply: float):
         """
         Setter for the free supply of tokens with validation.
         
         Ensures that free_supply cannot exceed the total supply.
         
         Args:
-            value (float): The new value for free_supply.
+            new_free_supply (float): The new value for free_supply.
         
         Raises:
             ValueError: If value is greater than supply or negative.
         """
-        if not isinstance(value, (float, int)) or value < 0:
+        if not isinstance(new_free_supply, (float, int)) or new_free_supply < 0:
             raise ValueError("Free supply must be a positive number.")
-        if value > self._supply:
+        if new_free_supply > self._supply:
             raise ValueError("Free supply cannot exceed total supply.")
-        self._free_supply = float(value)
+        self._free_supply = float(new_free_supply)
 
     @price.setter
     def price(self, new_price: float):

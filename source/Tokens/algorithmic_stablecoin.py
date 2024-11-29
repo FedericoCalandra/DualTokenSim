@@ -34,6 +34,7 @@ class AlgorithmicStablecoin(SeignorageModelToken):
         if peg <= 0:
             raise ValueError("The peg value must be positive.")
         self._peg = peg  # Store peg as a private attribute
+        self._tied = False  # Initially, the stablecoin is not tied to any CollateralToken
 
     @property
     def peg(self):

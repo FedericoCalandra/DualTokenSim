@@ -13,12 +13,14 @@ class SeignorageModelToken(Token, ABC):
     Attributes:
         name (str): The name of the token.
         supply (float): The current supply of the token.
+        free_supply (float): The amount of tokens present in users' wallets.
         price (float): The current price of the token.
     """
 
-    def __init__(self, name: str, initial_supply: float, initial_price: float):
+    def __init__(self, name: str, initial_supply: float, initial_free_supply: float, \
+                  initial_price: float):
         """
-        Initializes the SeignorageModelToken with a given name, initial supply, and price.
+        Initializes the SeignorageModelToken with a given name, initial supply, initial_free_supply and price.
 
         This token will serve as part of an algorithmic stablecoin pair. The price and supply of the token
         may change over time to help maintain the peg with the stablecoin counterpart.
@@ -26,11 +28,12 @@ class SeignorageModelToken(Token, ABC):
         Args:
             name (str): The name of the token.
             initial_supply (float): The initial supply of the token.
+            initial_free_supply (float): The initial free supply of the token.
             initial_price (float): The initial price of the token.
 
         """
         # Initialize the parent Token class
-        super().__init__(name, initial_supply, initial_price)
+        super().__init__(name, initial_supply, initial_free_supply, initial_price)
 
     def mint(self, amount: float):
         """
@@ -45,7 +48,6 @@ class SeignorageModelToken(Token, ABC):
             raise ValueError("Amount to mint must be positive.")
         # The parent class setter is invoked to ensure the free_supply attribute is
         # consistent with the change in the total supply.
-
         self.supply += amount
 
     def burn(self, amount: float):

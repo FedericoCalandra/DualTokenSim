@@ -62,7 +62,8 @@ class TestTokenClasses(unittest.TestCase):
         
     def test_seignorage_model_token_minting(self):
         """Test minting tokens in seignorage model"""
-        collateral_token = CollateralToken("LUNA", 1000, 900, 10.0)
+        stablecoin = AlgorithmicStablecoin("AS", 1000, 900, 1, 1)
+        collateral_token = CollateralToken("LUNA", 1000, 900, 10.0, stablecoin)
 
         initial_supply = collateral_token.supply
         initial_free_supply = collateral_token.free_supply
@@ -75,7 +76,8 @@ class TestTokenClasses(unittest.TestCase):
 
     def test_seignorage_model_token_burning(self):
         """Test burning tokens in seignorage model"""
-        collateral_token = CollateralToken("LUNA", 1000, 900, 10.0)
+        stablecoin = AlgorithmicStablecoin("AS", 1000, 900, 1, 1)
+        collateral_token = CollateralToken("LUNA", 1000, 900, 10.0, stablecoin)
 
         initial_supply = collateral_token.supply
         collateral_token.burn(300)
@@ -84,7 +86,8 @@ class TestTokenClasses(unittest.TestCase):
         with self.assertRaises(ValueError):
             collateral_token.burn(1500)  # Cannot burn more than supply
 
-        collateral_token2 = CollateralToken("LUNA2", 1000, 900, 1)
+        stablecoin2 = AlgorithmicStablecoin("AS", 1000, 900, 1, 1)
+        collateral_token2 = CollateralToken("LUNA2", 1000, 900, 1, stablecoin2)
         collateral_token2.free_supply = 300
         with self.assertRaises(ValueError):
             collateral_token2.burn(301)
@@ -142,7 +145,8 @@ class TestTokenClasses(unittest.TestCase):
 
     def test_collateral_token_mint_burn_limit(self):
         """Test minting and burning limits in CollateralToken"""
-        collateral_token = CollateralToken("ETH", 1000, 900, 2000.0)
+        stablecoin = AlgorithmicStablecoin("AS", 1000, 900, 1, 1)
+        collateral_token = CollateralToken("ETH", 1000, 900, 2000.0, stablecoin)
         
         # Minting more tokens should increase supply
         collateral_token.mint(1000)
@@ -166,7 +170,8 @@ class TestTokenClasses(unittest.TestCase):
 
     def test_seignorage_model_burn_after_mint(self):
         """Test minting and burning sequence"""
-        collateral_token = CollateralToken("USDT", 1000, 900, 1.0)
+        stablecoin = AlgorithmicStablecoin("AS", 1000, 900, 1, 1)
+        collateral_token = CollateralToken("USDT", 1000, 900, 1.0, stablecoin)
         collateral_token.mint(500)
         self.assertEqual(collateral_token.supply, 1500)
         collateral_token.burn(200)
@@ -191,6 +196,28 @@ class TestTokenClasses(unittest.TestCase):
         with self.assertRaises(TypeError):
             Token("InvalidToken", 1000, 900, 10.0)  # Cannot instantiate Token directly
 
+    def test_algorithmic_stablecoin_immutable(self):
+        stablecoin = AlgorithmicStablecoin("AS", 1000, 900, 1, 1)
+        collateral_token = CollateralToken("USDT", 1000, 900, 1.0, stablecoin)
+        stablecoin2 = AlgorithmicStablecoin("AS2", 1000, 900, 1, 1)
+
+        with self.assertRaises(AttributeError):
+            collateral_token.algorithmic_stablecoin = stablecoin2
+
+    def test_collateral_token_binding_error(self):
+        """
+        Test to ensure that a RuntimeError is raised if two CollateralTokens 
+        are instantiated with the same AlgorithmicStablecoin.
+        """
+        # Create an instance of AlgorithmicStablecoin
+        stablecoin = AlgorithmicStablecoin("AlgoStable", 1000, 800, 1.0)
+        # Create the first CollateralToken, it should work fine
+        collateral_1 = CollateralToken("Collateral1", 1000, 800, 50.0, stablecoin)
+        self.assertEqual(collateral_1.algorithmic_stablecoin, stablecoin)
+        self.assertTrue(stablecoin._tied)  # Check that the stablecoin is tied to the first collateral token
+        # Try to create the second CollateralToken with the same AlgorithmicStablecoin
+        with self.assertRaises(RuntimeError):
+            collateral_2 = CollateralToken("Collateral2", 500,400, 25.0,stablecoin)
    
 if __name__ == '__main__':
     unittest.main()

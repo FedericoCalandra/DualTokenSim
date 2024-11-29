@@ -22,7 +22,7 @@ class ReferenceToken(Token):
             name (str): The name of the ReferenceToken.
         """
         # Call the parent constructor with a fixed price of 1.0 and infinite supply.
-        super().__init__(name, float('inf'), 1.0)
+        super().__init__(name, float('inf'), float('inf'), 1.0)
 
     @property
     def price(self):

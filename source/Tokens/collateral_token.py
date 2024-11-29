@@ -9,20 +9,23 @@ class CollateralToken(SeignorageModelToken):
     Attributes:
         name (str): The name of the token.
         supply (float): The current supply of the token.
+        free_supply (float): The current free supply of the token.
         price (float): The current price of the token.
     """
 
-    def __init__(self, name: str, initial_supply: float, initial_price: float):
+    def __init__(self, name: str, initial_supply: float, initial_free_supply: float, \
+                  initial_price: float):
         """
         Initializes the CollateralToken with a name, initial supply, and price.
 
         Args:
             name (str): The name of the collateral token.
             initial_supply (float): The initial supply of the collateral token.
+            initial_free_supply (float): The initial free supply of the collateral token.
             initial_price (float): The initial price of the collateral token.
         """
         # Initialize the parent class (SeignorageModelToken) with the given parameters
-        super().__init__(name, initial_supply, initial_price)
+        super().__init__(name, initial_supply, initial_free_supply, initial_price)
 
     def __repr__(self) -> str:
         """
@@ -31,4 +34,4 @@ class CollateralToken(SeignorageModelToken):
         Returns:
             str: A string representation of the CollateralToken object.
         """
-        return f"CollateralToken(name={self.name}, price={self.price}, supply={self.supply})"
+        return f"CollateralToken(name={self.name}, price={self.price}, supply={self.supply}, free_supply={self.free_supply})"

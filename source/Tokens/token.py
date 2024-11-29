@@ -11,25 +11,36 @@ class Token(ABC):
         price (float): The current price of the token.
     """
     
-    def __init__(self, name: str, initial_supply: float, initial_price: float):
+    def __init__(self, name: str, initial_supply: float, initial_free_supply: float, \
+                 initial_price: float):
         """
         Initializes an instance of the Token class with the provided values.
         
         Args:
             name (str): The name of the token.
-            initial_supply (float): The initial supply of the token. Must be a positive number.
-            initial_price (float): The initial price of the token. Must be a positive number.
+            initial_supply (float): The initial supply of the token. 
+                                    Must be a positive number.
+            initial_free_supply (float): The initial free supply of the token. 
+                                         Must be a positive number, 
+                                         less than or equal to initial_supply.
+            initial_price (float): The initial price of the token. 
+                                   Must be a positive number.
         
         Raises:
             TypeError: If the name is not a string.
-            ValueError: If the initial supply is not a positive number or 
-                        if the initial price is not a positive number.
+            ValueError: If the initial supply is not a positive number, 
+                        if the initial price is not a positive number,
+                        or if initial_free_supply is greater than initial_supply.
         """
         # Argument validation
         if not isinstance(name, str):
             raise TypeError("The token name must be a string.")
         if not isinstance(initial_supply, (int, float)) or initial_supply <= 0:
             raise ValueError("The initial supply must be a positive number.")
+        if not isinstance(initial_free_supply, (int, float)) or initial_free_supply < 0:
+            raise ValueError("The initial free supply must be a positive number.")
+        if initial_free_supply > initial_supply:
+            raise ValueError("The initial free supply cannot exceed the initial supply.")
         if not isinstance(initial_price, (float, int)) or initial_price <= 0:
             raise ValueError("The initial price must be a positive number.")
         
@@ -37,8 +48,7 @@ class Token(ABC):
         self.name = name
         # We use private attributes.
         self._supply = float(initial_supply)
-        # When a token is instantiated all tokens are in users' wallets.
-        self._free_supply = float(initial_supply)
+        self._free_supply = float(initial_free_supply)
         self._price = float(initial_price)  
 
 

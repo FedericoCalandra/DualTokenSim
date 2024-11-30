@@ -1,36 +1,53 @@
 from abc import ABC, abstractmethod
-from typing import Tuple
-
+from source.wallets_generators.wallets_generator import WalletsGenerator
 from source.Tokens.token import Token
-
 
 class PurchaseGenerator(ABC):
     """
-    Abstract base class for generating random purchase events. This class ties purchase events to a specific liquidity
-    pool and provides a template for subclasses to implement event generation logic.
+    Abstract base class for generating random purchase events. This class is 
+    designed to work with a wallets generator, which provides wallet balances for
+    simulating purchase events.
 
     Attributes:
-        liquidity_pool (LiquidityPool): Reference to the liquidity pool where purchases are simulated.
+        token (Token): token whose purchase amount is simulated.
+        wallets_generator (WalletsGenerator): An instance of WalletsGenerator 
+                                              used to provide wallet balances 
+                                              for the simulated purchases.
     """
 
-    def __init__(self, liquidity_pool):
+    def __init__(self, token: Token, wallets_generator: WalletsGenerator):
         """
-        Initializes the PurchaseGenerator with a specific liquidity pool.
+        Initializes the PurchaseGenerator with a WalletsGenerator.
 
         Args:
-            liquidity_pool (LiquidityPool): The liquidity pool associated with this generator.
+            token (Token): token whose purchase amount is simulated.
+            wallets_generator (WalletsGenerator): An instance of WalletsGenerator 
+                                                responsible for generating wallet
+                                                balances for purchase simulation.
+
+        Raises:
+            TypeError: If wallets_generator is not an instance of WalletsGenerator and
+                       if token is not an instance of Token.
         """
-        self.liquidity_pool = liquidity_pool
+        if not isinstance(token, Token):
+            raise TypeError("The token argument must be an instance of Token.")
+        if not isinstance(wallets_generator, WalletsGenerator):
+            raise TypeError("The wallets_generator argument must be an instance of WalletsGenerator.")
+        # Initializing attributes.
+        self.token = Token
+        self.wallets_generator = wallets_generator
 
     @abstractmethod
-    def generate_random_purchase(self) -> Tuple[Token, float]:
+    def generate_random_purchase(self) -> float:
         """
-        Abstract method to generate a random purchase event.
+        Abstract method for calculating the amount of tokens to buy or sell.
+
+        This method should be implemented to compute the amount of tokens that 
+        would be involved in a purchase or sale event based on the specific 
+        logic of the subclass.
 
         Returns:
-            dict: A representation of the purchase event, including details such as the token purchased and the amount.
-
-        Note:
-            This method must be implemented by subclasses to define the specific logic for generating purchases.
+            float: The amount of tokens to be purchased or sold.
         """
         pass
+

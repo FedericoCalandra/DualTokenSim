@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from source.tokens.token import Token
 
+
 class SeignorageModelToken(Token, ABC):
     """
     Represents a token within an algorithmic stablecoin model, such as the Terra/Luna model.
@@ -12,13 +13,9 @@ class SeignorageModelToken(Token, ABC):
 
     Attributes:
         name (str): The name of the token.
-        supply (float): The current supply of the token.
-        free_supply (float): The amount of tokens present in users' wallets.
-        price (float): The current price of the token.
     """
 
-    def __init__(self, name: str, initial_supply: float, initial_free_supply: float, \
-                  initial_price: float):
+    def __init__(self, name: str, initial_supply: float, initial_free_supply: float, initial_price: float):
         """
         Initializes the SeignorageModelToken with a given name, initial supply, initial_free_supply and price.
 
@@ -40,7 +37,7 @@ class SeignorageModelToken(Token, ABC):
         This method is essential for increasing the supply of the token in order to stabilize the system.
 
         Args:
-            amount (float): The number of tokens to mint (increase the supply).
+            amount_to_mint (float): The number of tokens to mint (increase the supply).
         Raises:
             ValueError: If the amount is negative.
         """
@@ -56,7 +53,7 @@ class SeignorageModelToken(Token, ABC):
         and prevent the price from falling too low.
 
         Args:
-            amount (float): The number of tokens to burn (decrease the supply).
+            amount_to_burn (float): The number of tokens to burn (decrease the supply).
 
         Raises:
             ValueError: If the amount is negative or greater than the current supply.

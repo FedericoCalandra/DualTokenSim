@@ -1,9 +1,9 @@
 import unittest
-from source.Tokens.token import Token
-from source.Tokens.algorithmic_stablecoin import AlgorithmicStablecoin
-from source.Tokens.collateral_token import CollateralToken
-from source.Tokens.reference_token import ReferenceToken
-from source.Tokens.generic_token import GenericToken
+from source.tokens.token import Token
+from source.tokens.algorithmic_stablecoin import AlgorithmicStablecoin
+from source.tokens.collateral_token import CollateralToken
+from source.tokens.reference_token import ReferenceToken
+from source.tokens.generic_token import GenericToken
 
 
 class TestTokenClasses(unittest.TestCase):

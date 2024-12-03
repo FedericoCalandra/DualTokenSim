@@ -1,4 +1,4 @@
-from source.Tokens.seignorage_model_token import SeignorageModelToken
+from source.tokens.seignorage_model_token import SeignorageModelToken
 
 class AlgorithmicStablecoin(SeignorageModelToken):
     """

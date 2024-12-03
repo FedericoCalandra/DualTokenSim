@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List
-from source.LiquidityPools.liquidity_pool import LiquidityPool
-from source.LiquidityPools.virtual_liquidity_pool import VirtualLiquidityPool
+from source.liquidity_pools.liquidity_pool import LiquidityPool
+from source.liquidity_pools.virtual_liquidity_pool import VirtualLiquidityPool
 
 
 class ArbitrageOptimizer(ABC):

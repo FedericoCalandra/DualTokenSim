@@ -2,13 +2,13 @@ import unittest
 from typing import Tuple
 from source.arbitrage_optimizer.arbitrage_optimizer import ArbitrageOptimizer
 from source.market_simulators.market_simulator import MarketSimulator
-from source.LiquidityPools.constant_product_formula import ConstantProductFormula
-from source.LiquidityPools.liquidity_pool import LiquidityPool
-from source.LiquidityPools.simple_virtual_liquidity_pool import SimpleVirtualLiquidityPool
-from source.Tokens.algorithmic_stablecoin import AlgorithmicStablecoin
-from source.Tokens.collateral_token import CollateralToken
-from source.Tokens.generic_token import GenericToken
-from source.Tokens.token import Token
+from source.liquidity_pools.constant_product_formula import ConstantProductFormula
+from source.liquidity_pools.liquidity_pool import LiquidityPool
+from source.liquidity_pools.simple_virtual_liquidity_pool import SimpleVirtualLiquidityPool
+from source.tokens.algorithmic_stablecoin import AlgorithmicStablecoin
+from source.tokens.collateral_token import CollateralToken
+from source.tokens.generic_token import GenericToken
+from source.tokens.token import Token
 from source.purchase_generators.purchase_generator import PurchaseGenerator
 from source.wallets_generators.wallets_generator import WalletsGenerator
 

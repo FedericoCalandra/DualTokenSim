@@ -1,5 +1,5 @@
-from source.Tokens.seignorage_model_token import SeignorageModelToken
-from source.Tokens.algorithmic_stablecoin import AlgorithmicStablecoin
+from source.tokens.seignorage_model_token import SeignorageModelToken
+from source.tokens.algorithmic_stablecoin import AlgorithmicStablecoin
 
 class CollateralToken(SeignorageModelToken):
     """

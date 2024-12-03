@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
 
-from source.LiquidityPools.formula import Formula
-from source.LiquidityPools.liquidity_pool import LiquidityPool
-from source.Tokens.token import Token
+from source.liquidity_pools.formula import Formula
+from source.liquidity_pools.liquidity_pool import LiquidityPool
+from source.tokens.token import Token
 
 
 class VirtualLiquidityPool(LiquidityPool, ABC):

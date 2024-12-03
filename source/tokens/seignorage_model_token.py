@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from source.Tokens.token import Token
+from source.tokens.token import Token
 
 class SeignorageModelToken(Token, ABC):
     """

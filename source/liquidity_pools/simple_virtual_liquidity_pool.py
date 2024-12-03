@@ -1,4 +1,4 @@
-from source.LiquidityPools.virtual_liquidity_pool import VirtualLiquidityPool
+from source.liquidity_pools.virtual_liquidity_pool import VirtualLiquidityPool
 
 
 class SimpleVirtualLiquidityPool(VirtualLiquidityPool):

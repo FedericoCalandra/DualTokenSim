@@ -1,9 +1,9 @@
 from typing import Callable
 from source.wallets_generators.wallets_generator import WalletsGenerator
 from source.purchase_generators.purchase_generator import PurchaseGenerator
-from source.Tokens.seignorage_model_token import SeignorageModelToken
-from source.Tokens.algorithmic_stablecoin import AlgorithmicStablecoin
-from source.Tokens.collateral_token import CollateralToken
+from source.tokens.seignorage_model_token import SeignorageModelToken
+from source.tokens.algorithmic_stablecoin import AlgorithmicStablecoin
+from source.tokens.collateral_token import CollateralToken
 import numpy as np
 
 class SeignorageModelPurchaseGenerator(PurchaseGenerator):

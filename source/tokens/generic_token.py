@@ -1,4 +1,4 @@
-from source.Tokens.token import Token
+from source.tokens.token import Token
 
 class GenericToken(Token):
     """

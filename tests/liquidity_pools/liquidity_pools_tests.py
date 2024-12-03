@@ -1,6 +1,6 @@
 import unittest
-from source.LiquidityPools.constant_product_formula import ConstantProductFormula
-from source.LiquidityPools.liquidity_pool import LiquidityPool
+from source.liquidity_pools.constant_product_formula import ConstantProductFormula
+from source.liquidity_pools.liquidity_pool import LiquidityPool
 
 
 class MockToken:

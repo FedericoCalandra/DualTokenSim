@@ -1,8 +1,9 @@
 from abc import ABC, abstractmethod
 
-from source.LiquidityPools.formula import Formula
-from source.LiquidityPools.liquidity_pool import LiquidityPool
-from source.Tokens.token import Token
+from source.liquidity_pools.formula import Formula
+from source.liquidity_pools.liquidity_pool import LiquidityPool
+from source.tokens.seignorage_model_token import SeignorageModelToken
+from source.tokens.token import Token
 
 
 class VirtualLiquidityPool(LiquidityPool, ABC):
@@ -34,7 +35,6 @@ class VirtualLiquidityPool(LiquidityPool, ABC):
             stablecoin_base_quantity (float): Initial quantity of stablecoin in the pool.
             fee (float): Transaction fee percentage applied to swaps.
             formula (Formula): Formula instance defining the swap computation logic.
-            collateral_price (float): Initial reference price of the collateral token.
         """
         if stablecoin_base_quantity < 0 or fee < 0:
             raise ValueError("Invalid inputs for this virtual liquidity pool.")
@@ -45,7 +45,7 @@ class VirtualLiquidityPool(LiquidityPool, ABC):
         self.collateral_price = collateral.price
         self.delta = 0
 
-    def swap(self, input_token, input_amount):
+    def swap(self, input_token: SeignorageModelToken, input_amount: float):
         """
         Overrides swap method defined in LiquidityPool to include the delta dynamics.
         Executes a swap between stablecoin and collateral, adjusting the pool quantities accordingly.
@@ -60,15 +60,17 @@ class VirtualLiquidityPool(LiquidityPool, ABC):
         Raises:
             ValueError: If the input token is not recognized or if input_amount is invalid.
         """
-        output_token, output_quantity = super().swap(input_token, input_amount)
+        output_token, output_amount = super().swap(input_token, input_amount)
 
         if input_token.is_equal(self.token_a):
             delta_variation = input_amount
         else:
-            delta_variation = -output_quantity
+            delta_variation = -output_amount
         self.update_delta(delta_variation)
+        input_token.burn(input_amount)
+        output_token.mint(output_amount)
 
-        return output_token, output_quantity
+        return output_token, output_amount
 
     def update_token_quantities(self):
         """

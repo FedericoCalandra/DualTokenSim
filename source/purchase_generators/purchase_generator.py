@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from source.wallets_generators.wallets_generator import WalletsGenerator
-from source.Tokens.token import Token
+from source.tokens.token import Token
 
 class PurchaseGenerator(ABC):
     """

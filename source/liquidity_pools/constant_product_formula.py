@@ -1,4 +1,4 @@
-from source.LiquidityPools.formula import Formula
+from source.liquidity_pools.formula import Formula
 
 
 class ConstantProductFormula(Formula):

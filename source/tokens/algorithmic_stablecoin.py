@@ -1,5 +1,6 @@
 from source.tokens.seignorage_model_token import SeignorageModelToken
 
+
 class AlgorithmicStablecoin(SeignorageModelToken):
     """
     Represents an algorithmic stablecoin within the seignorage model.
@@ -14,8 +15,8 @@ class AlgorithmicStablecoin(SeignorageModelToken):
         peg (float): The target price the stablecoin is pegged to (e.g., 1.0 USD).
     """
 
-    def __init__(self, name: str, initial_supply: float, initial_free_supply: float, \
-                 initial_price: float, peg: float = 1.0):
+    def __init__(self, name: str, initial_supply: float, initial_free_supply: float, initial_price: float,
+                 peg: float = 1.0):
         """
         Initializes the AlgorithmicStablecoin with a name, initial supply, and peg value.
 
@@ -33,8 +34,8 @@ class AlgorithmicStablecoin(SeignorageModelToken):
         super().__init__(name, initial_supply, initial_free_supply, initial_price)
         if peg <= 0:
             raise ValueError("The peg value must be positive.")
-        self._peg = peg  # Store peg as a private attribute
-        self._tied = False  # Initially, the stablecoin is not tied to any CollateralToken
+        self._peg = peg
+        self._tied = False
 
     @property
     def peg(self):
@@ -63,5 +64,5 @@ class AlgorithmicStablecoin(SeignorageModelToken):
         Returns:
             str: A string representation of the AlgorithmicStablecoin object.
         """
-        return f"AlgorithmicStablecoin(name={self.name}, price={self.price}, supply={self.supply}, free_supply={self.free_supply}, peg={self.peg})"
-
+        return (f"AlgorithmicStablecoin(name={self.name}, price={self.price}, supply={self.supply},"
+                f"free_supply={self.free_supply}, peg={self.peg})")

@@ -45,14 +45,14 @@ class VirtualLiquidityPool(LiquidityPool, ABC):
         self.collateral_price = collateral.price
         self.delta = 0
 
-    def swap(self, input_token: SeignorageModelToken, input_amount: float):
+    def swap(self, token: SeignorageModelToken, amount: float):
         """
         Overrides swap method defined in LiquidityPool to include the delta dynamics.
         Executes a swap between stablecoin and collateral, adjusting the pool quantities accordingly.
 
         Args:
-            input_token (Token): The token being provided to the pool (either stablecoin or collateral).
-            input_amount (float): The amount of the input token to swap.
+            token (Token): The token being provided to the pool (either stablecoin or collateral).
+            amount (float): The amount of the input token to swap.
 
         Returns:
             tuple: The output token and the amount of the output token after swap and fee deduction.
@@ -60,14 +60,14 @@ class VirtualLiquidityPool(LiquidityPool, ABC):
         Raises:
             ValueError: If the input token is not recognized or if input_amount is invalid.
         """
-        output_token, output_amount = super().swap(input_token, input_amount)
+        output_token, output_amount = super().swap(token, amount)
 
-        if input_token.is_equal(self.token_a):
-            delta_variation = input_amount
+        if token.is_equal(self.token_a):
+            delta_variation = amount
         else:
             delta_variation = -output_amount
         self.update_delta(delta_variation)
-        input_token.burn(input_amount)
+        token.burn(amount)
         output_token.mint(output_amount)
 
         return output_token, output_amount

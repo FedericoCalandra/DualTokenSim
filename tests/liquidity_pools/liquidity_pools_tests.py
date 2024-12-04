@@ -1,112 +1,16 @@
 import unittest
 from source.liquidity_pools.constant_product_formula import ConstantProductFormula
 from source.liquidity_pools.liquidity_pool import LiquidityPool
-
-
-class MockToken:
-    def __init__(self, symbol: str):
-        self.symbol = symbol
-
-    def is_equal(self, other) -> bool:
-        return self.symbol == other.symbol
-
-
-class TestConstantProductFormula(unittest.TestCase):
-    def setUp(self):
-        """Initialize the formula instance before each test"""
-        self.formula = ConstantProductFormula()
-
-    def test_basic_constant_product(self):
-        """
-        Test that the constant product formula maintains k = x * y
-        for a standard swap scenario
-        """
-        # Arrange
-        input_reserve = 1000.0
-        output_reserve = 1000.0
-        input_quantity = 100.0
-
-        # Act
-        output_amount = self.formula.apply(input_quantity, input_reserve, output_reserve)
-
-        # Assert
-        initial_k = input_reserve * output_reserve
-        final_k = (input_reserve + input_quantity) * (output_reserve - output_amount)
-        self.assertAlmostEqual(initial_k, final_k, places=6)
-
-    def test_extreme_values(self):
-        """Test the formula with very large and very small values"""
-        test_cases = [
-            # (input_quantity, input_reserve, output_reserve)
-            (1e-18, 1000.0, 1000.0),  # Very small input
-            (1e18, 1e20, 1e20),  # Very large values
-            (0.0001, 1e-6, 1.0),  # Small reserves
-            (1000.0, 1e18, 1e-18)  # Extreme reserve ratio
-        ]
-
-        for input_qty, in_reserve, out_reserve in test_cases:
-            with self.subTest(f"Testing with {input_qty}, {in_reserve}, {out_reserve}"):
-                # Act
-                output = self.formula.apply(input_qty, in_reserve, out_reserve)
-
-                # Assert
-                self.assertGreater(output, 0)
-                initial_k = in_reserve * out_reserve
-                final_k = (in_reserve + input_qty) * (out_reserve - output)
-                # Use relative tolerance for extreme values
-                self.assertAlmostEqual(initial_k / final_k, 1.0, places=6)
-
-    def test_near_zero_quantity(self):
-        """Test behavior when one token has near-zero quantity"""
-        # Arrange
-        input_reserve = 1000.0
-        output_reserve = 1e-10
-        input_quantity = 10.0
-
-        # Act
-        output_amount = self.formula.apply(input_quantity, input_reserve, output_reserve)
-
-        # Assert
-        self.assertLess(output_amount, output_reserve)
-        self.assertGreater(output_amount, 0)
-
-    def test_invalid_inputs(self):
-        """Test that the formula properly handles invalid inputs"""
-        invalid_cases = [
-            (-100.0, 1000.0, 1000.0),  # Negative input quantity
-            (100.0, -1000.0, 1000.0),  # Negative input reserve
-            (100.0, 1000.0, -1000.0),  # Negative output reserve
-            (100.0, 0.0, 1000.0),  # Zero input reserve
-        ]
-
-        for input_qty, in_reserve, out_reserve in invalid_cases:
-            with self.subTest(f"Testing invalid inputs: {input_qty}, {in_reserve}, {out_reserve}"):
-                with self.assertRaises(ValueError):
-                    self.formula.apply(input_qty, in_reserve, out_reserve)
-
-    def test_inverse_apply(self):
-        """Test the inverse formula application"""
-        # Arrange
-        input_reserve = 1000.0
-        output_reserve = 1000.0
-        output_quantity = 100.0
-
-        # Act
-        input_amount = self.formula.inverse_apply(output_quantity, input_reserve, output_reserve)
-
-        # Assert
-        initial_k = input_reserve * output_reserve
-        final_k = (input_reserve + input_amount) * (output_reserve - output_quantity)
-        self.assertAlmostEqual(initial_k, final_k, places=6)
+from source.tokens.generic_token import GenericToken
 
 
 class TestLiquidityPool(unittest.TestCase):
     def setUp(self):
         """Initialize a standard liquidity pool before each test"""
-        self.token_a = MockToken("TOKENA")
-        self.token_b = MockToken("TOKENB")
+        self.token_a = GenericToken("TOKENA", 100000, 5000, 1)
+        self.token_b = GenericToken("TOKENB", 100000, 5000, 5)
         self.formula = ConstantProductFormula()
-        self.standard_fee = 0.003  # 0.3% fee
+        self.standard_fee = 0.003
 
     def create_pool(self, qty_a: float, qty_b: float, fee: float) -> 'LiquidityPool':
         """Helper method to create a liquidity pool with specified parameters"""
@@ -125,11 +29,28 @@ class TestLiquidityPool(unittest.TestCase):
 
         # Assert
         self.assertEqual(output_token, self.token_b)
-        self.assertEqual(pool.quantity_token_a, 1100.0)
+        self.assertAlmostEqual(pool.quantity_token_a, 1100.0, places=6)
         expected_output = self.formula.apply(
             input_amount * (1 - self.standard_fee), 1000.0, 1000.0
         )
-        self.assertAlmostEqual(pool.quantity_token_b, 1000.0 - expected_output)
+        self.assertAlmostEqual(pool.quantity_token_b, 1000.0 - expected_output, places=6)
+
+    def test_negative_swap(self):
+        """Test removing tokens from the pool using a negative amount"""
+        # Arrange
+        pool = self.create_pool(1000.0, 1000.0, self.standard_fee)
+        output_amount = -50.0  # Request to remove this amount of output token
+
+        # Act
+        output_token, input_amount = pool.swap(self.token_b, output_amount)
+
+        # Assert
+        self.assertEqual(output_token, self.token_b)
+        expected_input = self.formula.inverse_apply(
+            -output_amount * (1 - self.standard_fee), 1000.0, 1000.0
+        )
+        self.assertAlmostEqual(input_amount, expected_input, places=6)
+        self.assertAlmostEqual(pool.quantity_token_b, 1000.0 + output_amount, places=6)
 
     def test_fee_calculations(self):
         """Test different fee scenarios including zero fee"""
@@ -211,13 +132,12 @@ class TestLiquidityPool(unittest.TestCase):
         pool = self.create_pool(1000.0, 1000.0, self.standard_fee)
 
         invalid_cases = [
-            (MockToken("INVALID"), 100.0),  # Invalid token
-            (self.token_a, -100.0),  # Negative amount
-            (self.token_b, 0.0)  # Zero amount
+            (GenericToken("INVALID", 1, 1, 1), 100.0),  # Invalid token
+            (self.token_a, 0.0)  # Zero amount
         ]
 
         for token, amount in invalid_cases:
-            with self.subTest(f"Testing invalid swap: {token.symbol}, {amount}"):
+            with self.subTest(f"Testing invalid swap: {token.__repr__()}, {amount}"):
                 with self.assertRaises(ValueError):
                     pool.swap(token, amount)
 

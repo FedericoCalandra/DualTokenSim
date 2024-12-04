@@ -1,18 +1,18 @@
 from abc import ABC, abstractmethod
 
+
 class Token(ABC):
     """
     Abstract class representing a cryptocurrency.
     
     Attributes:
         name (str): The name of the token.
-        supply (float): The current total supply of the token.
-        free_supply (float): The amount of tokens present in users' wallets.
-        price (float): The current price of the token.
+        _supply (float): The current total supply of the token.
+        _free_supply (float): The amount of tokens present in users' wallets.
+        _price (float): The current price of the token.
     """
     
-    def __init__(self, name: str, initial_supply: float, initial_free_supply: float, \
-                 initial_price: float):
+    def __init__(self, name: str, initial_supply: float, initial_free_supply: float, initial_price: float):
         """
         Initializes an instance of the Token class with the provided values.
         
@@ -50,7 +50,6 @@ class Token(ABC):
         self._supply = float(initial_supply)
         self._free_supply = float(initial_free_supply)
         self._price = float(initial_price)  
-
 
     @property
     def supply(self):
@@ -145,7 +144,6 @@ class Token(ABC):
         """
         return self is other_token
 
-        
     @abstractmethod
     def __repr__(self) -> str:
         """
@@ -156,4 +154,3 @@ class Token(ABC):
             str: The textual representation of the token.
         """
         pass
-

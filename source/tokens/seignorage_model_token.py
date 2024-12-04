@@ -13,6 +13,9 @@ class SeignorageModelToken(Token, ABC):
 
     Attributes:
         name (str): The name of the token.
+        _supply (float): The current total supply of the token.
+        _free_supply (float): The amount of tokens present in users' wallets.
+        _price (float): The current price of the token.
     """
 
     def __init__(self, name: str, initial_supply: float, initial_free_supply: float, initial_price: float):

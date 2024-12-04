@@ -1,5 +1,6 @@
 from source.tokens.token import Token
 
+
 class ReferenceToken(Token):
     """
     Represents a reference token with a fixed price of 1.0$ and no defined supply.
@@ -8,9 +9,9 @@ class ReferenceToken(Token):
 
     Attributes:
         name (str): The name of the ReferenceToken.
-        price (float): Fixed price, always set to 1.0.
-        supply (float): Set to infinity to indicate that supply is undefined.
-        free_supply (float): Set to infinity to indicate that free supply is undefined.
+        _price (float): Fixed price, always set to 1.0.
+        _supply (float): Set to infinity to indicate that supply is undefined.
+        _free_supply (float): Set to infinity to indicate that free supply is undefined.
     """
     
     def __init__(self, name: str):
@@ -39,7 +40,6 @@ class ReferenceToken(Token):
         """The free supply of the ReferenceToken (always inf)."""
         return float('inf')
 
-
     def __repr__(self) -> str:
         """
         Returns a string representation of the ReferenceToken object.
@@ -48,4 +48,3 @@ class ReferenceToken(Token):
             str: A string representation of the ReferenceToken, including its name and price.
         """
         return f"ReferenceToken(name={self.name}, price={self.price})"
-

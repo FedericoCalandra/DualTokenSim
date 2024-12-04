@@ -1,6 +1,7 @@
 from source.tokens.seignorage_model_token import SeignorageModelToken
 from source.tokens.algorithmic_stablecoin import AlgorithmicStablecoin
 
+
 class CollateralToken(SeignorageModelToken):
     """
     Represents a collateral token in the seignorage model.
@@ -9,14 +10,14 @@ class CollateralToken(SeignorageModelToken):
 
     Attributes:
         name (str): The name of the token.
-        supply (float): The current supply of the token.
-        free_supply (float): The current free supply of the token.
-        price (float): The current price of the token.
-        algorithmic_stablecoin (AlgorithmicStablecoin): The associated stablecoin.
+        _supply (float): The current supply of the token.
+        _free_supply (float): The current free supply of the token.
+        _price (float): The current price of the token.
+        _algorithmic_stablecoin (AlgorithmicStablecoin): The associated stablecoin.
     """
 
-    def __init__(self, name: str, initial_supply: float, initial_free_supply: float, \
-                 initial_price: float, algorithmic_stablecoin: AlgorithmicStablecoin):
+    def __init__(self, name: str, initial_supply: float, initial_free_supply: float, initial_price: float,
+                 algorithmic_stablecoin: AlgorithmicStablecoin):
         """
         Initializes the CollateralToken with a name, initial supply, price,
         and a reference to an algorithmic stablecoin.
@@ -68,4 +69,3 @@ class CollateralToken(SeignorageModelToken):
         return (f"CollateralToken(name={self.name}, price={self.price}, "
                 f"supply={self.supply}, free_supply={self.free_supply}, "
                 f"algorithmic_stablecoin={self.algorithmic_stablecoin.name})")
-

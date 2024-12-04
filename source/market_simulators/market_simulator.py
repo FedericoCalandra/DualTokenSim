@@ -61,6 +61,6 @@ class MarketSimulator:
             None
         """
         for pool, generator in zip(self.liquidity_pools, self.purchase_generators):
-            input_token, input_amount = generator.generate_random_purchase()
-            pool.swap(input_token, input_amount)
+            amount = generator.generate_random_purchase()
+            pool.swap(pool.token_a, amount)
             self.arbitrage_optimizer.leverage_arbitrage_opportunity()

@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from source.wallets_generators.wallets_generator import WalletsGenerator
 from source.tokens.token import Token
 
+
 class PurchaseGenerator(ABC):
     """
     Abstract base class for generating random purchase events. This class is 
@@ -34,7 +35,7 @@ class PurchaseGenerator(ABC):
         if not isinstance(wallets_generator, WalletsGenerator):
             raise TypeError("The wallets_generator argument must be an instance of WalletsGenerator.")
         # Initializing attributes.
-        self.token = Token
+        self.token = token
         self.wallets_generator = wallets_generator
 
     @abstractmethod
@@ -50,4 +51,3 @@ class PurchaseGenerator(ABC):
             float: The amount of tokens to be purchased or sold.
         """
         pass
-

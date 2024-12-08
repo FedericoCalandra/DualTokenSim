@@ -7,13 +7,13 @@ class PurchaseGenerator(ABC):
     """
     Abstract base class for generating random purchase events. This class is 
     designed to work with a wallets generator, which provides wallet balances for
-    simulating purchase events.
+    simulating trade events.
 
     Attributes:
-        token (Token): token whose purchase amount is simulated.
+        token (Token): token whose transactions' amount is simulated.
         wallets_generator (WalletsGenerator): An instance of WalletsGenerator 
                                               used to provide wallet balances 
-                                              for the simulated purchases.
+                                              for the simulated trade amount.
     """
 
     def __init__(self, token: Token, wallets_generator: WalletsGenerator):
@@ -21,10 +21,10 @@ class PurchaseGenerator(ABC):
         Initializes the PurchaseGenerator with a WalletsGenerator.
 
         Args:
-            token (Token): token whose purchase amount is simulated.
+            token (Token): token whose trade amount is simulated.
             wallets_generator (WalletsGenerator): An instance of WalletsGenerator 
                                                 responsible for generating wallet
-                                                balances for purchase simulation.
+                                                balances for trades simulation.
 
         Raises:
             TypeError: If wallets_generator is not an instance of WalletsGenerator and
@@ -36,10 +36,10 @@ class PurchaseGenerator(ABC):
             raise TypeError("The wallets_generator argument must be an instance of WalletsGenerator.")
         # Initializing attributes.
         self.token = token
-        self.wallets_generator = wallets_generator
+        self._wallets_generator = wallets_generator
 
     @abstractmethod
-    def generate_random_purchase(self) -> float:
+    def generate_transaction_amount(self) -> float:
         """
         Abstract method for calculating the amount of tokens to buy or sell.
 

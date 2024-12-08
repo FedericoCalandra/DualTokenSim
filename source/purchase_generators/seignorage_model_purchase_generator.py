@@ -1,116 +1,74 @@
-from typing import Callable
-from source.wallets_generators.wallets_generator import WalletsGenerator
-from source.purchase_generators.purchase_generator import PurchaseGenerator
-from source.tokens.seignorage_model_token import SeignorageModelToken
+from typing import List
 from source.tokens.algorithmic_stablecoin import AlgorithmicStablecoin
 from source.tokens.collateral_token import CollateralToken
+from source.tokens.seignorage_model_token import SeignorageModelToken
+from source.purchase_generators.purchase_generator import PurchaseGenerator
+from source.wallets_generators.exponential_wallets_generator import ExponentialWalletsGenerator
 import numpy as np
-
 
 class SeignorageModelPurchaseGenerator(PurchaseGenerator):
     """
-    A concrete implementation of the PurchaseGenerator abstract class for generating
-    random purchase events within a seigniorage model. In this context, the token 
-    whose quantity is bought or sold must be an instance of either
-    AlgorithmicStablecoin or CollateralToken.
-
-    The nature of the purchase or sale is influenced by the price of an 
-    algorithmic stablecoin within the seigniorage model.
+    In this version, `volume` is a list of pre-generated volumes. 
+    Each trade consumes and removes the first element of the list. 
+    If all the volumes in the list are processed, an exception 
+    is raised.
     """
-    
-    def __init__(self, token: SeignorageModelToken, wallets_generator: WalletsGenerator, sigma: float = 1,
-                 mean: float = 0, volume: float = 1000, delta_variation: Callable[[float], float] = lambda x: 1 / x,
-                 threshold: float = 0.05):
+    def __init__(self, 
+                 token: SeignorageModelToken, 
+                 initial_volumes: List[float],
+                 mean: float = 0.0,  
+                 variance: float = 1.0
+                ):
         """
-        Initializes the PurchaseGeneratorConcrete instance with the provided parameters.
-
         Args:
-            token (AlgorithmicStablecoin or CollateralToken): The token whose
-            quantity is being simulated for purchase or sale.
-            wallets_generator (WalletsGenerator): An instance of WalletsGenerator 
-            used to generate wallet balances for simulation.
-            sigma (float): The variance of the Gaussian distribution used 
-            to determine the sale quantity.
-            mean (float): The mean of the Gaussian distribution used to determine 
-            the sale quantity.
-            volume (float): A scaling factor applied to the trade size based on
-            market volatility.
-            delta_variation (function): A mathematical function that adjusts 
-            the average sale quantity based on the stablecoin's price.
-            threshold (float): The price level below which market panic is triggered. 
-            A value of 0.05 indicates normal market conditions if the price is 
-            between 0.95 and 1.05.
+            token (SeignorageModelToken): The token for which purchase or sale 
+            volumes are generated.
+            initial_volumes (List[float]): Initial list of trade volumes.
+            variance (float): Variance of the Gaussian distribution for trade amounts
+            and their nature (sale or purchase).
+            mean (float): Mean of the Gaussian distribution for trade amounts.
 
         Raises:
-            TypeError: If token is not an instance of either
+            TypeError: If token is not an instance of
                        `AlgorithmicStablecoin` or `CollateralToken`.
-            ValueError: If `threshold`, `sigma`, or `mean` are not floats, or 
-                        if `delta_variation` is not a function.
+            ValueError: `variance`, or `mean` are not positive floats.
         """
-        super().__init__(token, wallets_generator)
+        # The instance is initialized with a dummy wallet generator (it is not
+        # used within the class).
+        super().__init__(token, ExponentialWalletsGenerator(0.01))
+        if not isinstance(initial_volumes, list):
+            raise TypeError("Volumes must be a list!")
         if not isinstance(token, (AlgorithmicStablecoin, CollateralToken)):
-            raise TypeError("token must be an instance of AlgorithmicStablecoin or CollateralToken.")
-        if not all(isinstance(x, float) for x in [threshold, sigma, mean]):
-            raise ValueError("threshold, sigma, and mean must be floats.") 
-        if not isinstance(volume, float) or volume < 0:
-            raise TypeError("volatility must be a float and must be positive.")
-        if not callable(delta_variation):
-            raise ValueError("delta_variation must be a function.")   
+            raise TypeError("Token must be an instance of AlgorithmicStablecoin or CollateralToken.")
+        for param, name in [
+            (variance, "variance"),
+            (mean, "mean"),
+        ]:
+            if not isinstance(param, (float, int)) or param < 0:
+                raise ValueError(f"{name} must be a positive float or integer.") 
 
-        # Initialization of arguments.   
-        self.volume = volume
-        self._initial_mean = mean
-        self.threshold = threshold
-        self.sigma = sigma
-        self.mean = mean
-        self.delta_variation = delta_variation
+        # Initialize instance attributes.
+        self.volumes = initial_volumes
+        self.variance = float(variance)
+        self.mean = float(mean)
 
-    def generate_random_purchase(self) -> float:
+    def generate_transaction_amount(self) -> float:
         """
-        Computes the amount of tokens to be bought or sold. A negative amount
-        indicates a sale, while a positive amount indicates a purchase. This amount
-        is determined using a Gaussian distribution, where the mean depends on whether
-        the market is in a normal state or a panic situation.
-
-        If the stablecoin price falls outside the panic threshold, the function generates
-        trades that mimic market panic behavior.
+        Consumes the first volume in the list. If the list is empty, it raises
+        an exception.
 
         Returns:
-            A float representing the amount of tokens to be bought or sold, ensuring 
-            the user cannot trade more tokens than available in their wallet.
+            float: The amount of tokens to be bought or sold.
+                   Positive values indicate sales, negative values indicate purchases.
         """
-        if isinstance(self.token, AlgorithmicStablecoin):
-            self.compute_mean_variation(self.token)
-        else:
-            self.compute_mean_variation(self.token.algorithmic_stablecoin())
+        if not self.volumes:
+            raise IndexError("No more volumes available to process.")       
+        # Retrieve and remove the first volume from the list
+        volume = self.volumes.pop(0)
+        # Calculation of the actual quantity to be exchanged using a Gaussian.
+        trade_amount  = np.random.normal(self.mean, self.variance) * volume    
+        # Return the final transaction amount.
+        return float(trade_amount)
+        
 
-        dollars_trade_amount = np.random.normal(self.mean, self.sigma) * self.volume
-        trade_amount = dollars_trade_amount / self.token.price
 
-        random_wallet_balance = self.wallets_generator.get_random_wallet(self.token.free_supply)
-
-        return min(trade_amount, random_wallet_balance)
-
-    def compute_mean_variation(self, stablecoin: AlgorithmicStablecoin):
-        """
-        Updates the mean of the Gaussian distribution based on the current token price.
-
-        This method adjusts the `mean` attribute by applying the `delta_variation` 
-        function to the provided token price. The `delta_variation` function defines
-        how the Gaussian mean should vary in response to price changes, allowing
-        the model to reflect market behavior dynamically in normal or panic situations.
-
-        Args:
-            stablecoin(float): The stablecoin of the seignorage model.
-        """
-        if not isinstance(stablecoin, AlgorithmicStablecoin):
-            raise TypeError("Input of 'compute_mean_variation' must be an instance of AlgorithmicStablecoin.")
-        if stablecoin.price > stablecoin.peg - self.threshold:
-            self.mean = 0
-        else:
-            self.mean = self._initial_mean + self.delta_variation(stablecoin.price)
-   
-    def update_volume(self, volume: float):
-        if not isinstance(volume, float) or volume < 0:
-            raise TypeError("volatility must be a float and must be positive.")
-        self.volume = volume

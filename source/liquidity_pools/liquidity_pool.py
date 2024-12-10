@@ -81,6 +81,8 @@ class LiquidityPool:
         else:
             self.quantity_token_b, self.quantity_token_a = input_reserve, output_reserve
 
+        self.token_a.price = self.quantity_token_b / self.quantity_token_a
+
         return output_token, output_amount
 
     def compute_swap_value(self, input_quantity, input_reserve, output_reserve):

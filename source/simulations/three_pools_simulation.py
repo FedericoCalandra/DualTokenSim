@@ -18,7 +18,7 @@ class ThreePoolsSimulation:
                  reference_token: ReferenceToken,
                  stablecoin_pool: LiquidityPool, collateral_pool: LiquidityPool, virtual_pool: VirtualLiquidityPool,
                  stablecoin_purchase_generator: PurchaseGenerator, collateral_purchase_generator: PurchaseGenerator,
-                 initial_collateral_token_price: float, number_of_iterations: int):
+                 number_of_iterations: int):
         """
         Initializes the AlgorithmicStablecoinSimulation instance with the necessary components.
         """
@@ -33,7 +33,6 @@ class ThreePoolsSimulation:
         self.stablecoin_purchase_generator = stablecoin_purchase_generator
         self.collateral_purchase_generator = collateral_purchase_generator
 
-        self.initial_collateral_token_price = initial_collateral_token_price
         self.number_of_iterations = number_of_iterations
 
         liquidity_pools = [self.stablecoin_pool, self.collateral_pool]

@@ -18,8 +18,8 @@ class SeignorageModelPurchaseGenerator(PurchaseGenerator):
     algorithmic stablecoin within the seigniorage model.
     """
     
-    def __init__(self, token: SeignorageModelToken, wallets_generator: WalletsGenerator, sigma: float = 1,
-                 mean: float = 0, volume: float = 1000, delta_variation: Callable[[float], float] = lambda x: 1 / x,
+    def __init__(self, token: SeignorageModelToken, wallets_generator: WalletsGenerator, sigma: float = 1.0,
+                 mean: float = 0.0, volume: float = 1000.0, delta_variation: Callable[[float], float] = lambda x: 1 / x,
                  threshold: float = 0.05):
         """
         Initializes the PurchaseGeneratorConcrete instance with the provided parameters.
@@ -53,7 +53,7 @@ class SeignorageModelPurchaseGenerator(PurchaseGenerator):
         if not all(isinstance(x, float) for x in [threshold, sigma, mean]):
             raise ValueError("threshold, sigma, and mean must be floats.") 
         if not isinstance(volume, float) or volume < 0:
-            raise TypeError("volatility must be a float and must be positive.")
+            raise TypeError("volume must be a float and must be positive.")
         if not callable(delta_variation):
             raise ValueError("delta_variation must be a function.")   
 
@@ -82,7 +82,7 @@ class SeignorageModelPurchaseGenerator(PurchaseGenerator):
         if isinstance(self.token, AlgorithmicStablecoin):
             self.compute_mean_variation(self.token)
         else:
-            self.compute_mean_variation(self.token.algorithmic_stablecoin())
+            self.compute_mean_variation(self.token.algorithmic_stablecoin)
 
         dollars_trade_amount = np.random.normal(self.mean, self.sigma) * self.volume
         trade_amount = dollars_trade_amount / self.token.price

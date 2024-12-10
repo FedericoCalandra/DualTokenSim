@@ -40,6 +40,10 @@ class ReferenceToken(Token):
         """The free supply of the ReferenceToken (always inf)."""
         return float('inf')
 
+    @free_supply.setter
+    def free_supply(self, new_free_supply: float):
+        pass
+
     def __repr__(self) -> str:
         """
         Returns a string representation of the ReferenceToken object.

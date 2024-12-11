@@ -36,13 +36,12 @@ class ThreePoolsArbitrageOptimizer(ArbitrageOptimizer):
         arbitrage_type, arbitrage_available = self.detect_arbitrage()
 
         if arbitrage_available:
-
             if arbitrage_type == 'Type 1':  # Arbitrage Type 1
                 trade_amount = min(self.compute_max_arbitrage_profit("Type 1"), self.max_arbitrage_input)
 
                 token, x = self.liquidity_pools[1].swap(self.liquidity_pools[1].token_b, trade_amount)
                 token, x = self.virtual_liquidity_pool.swap(token, x)
-                self.liquidity_pools[0].swap(token, x)
+                print(self.liquidity_pools[0].swap(token, x))
 
             else:  # Arbitrage Type 2
                 trade_amount = min(self.compute_max_arbitrage_profit("Type 2"), self.max_arbitrage_input)

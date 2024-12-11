@@ -63,4 +63,5 @@ class MarketSimulator:
         for pool, generator in zip(self.liquidity_pools, self.purchase_generators):
             amount = generator.generate_random_purchase()
             pool.swap(pool.token_a, amount)
+            pool.token_a.price = pool.quantity_token_b / pool.quantity_token_a
             self.arbitrage_optimizer.leverage_arbitrage_opportunity()

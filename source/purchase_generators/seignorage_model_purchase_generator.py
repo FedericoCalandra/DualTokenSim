@@ -13,7 +13,6 @@ class SeignorageModelPurchaseGenerator(PurchaseGenerator):
     If all the volumes in the list are processed, an exception 
     is raised.
     """
-
     def __init__(self, 
                  token: SeignorageModelToken, 
                  initial_volumes: List[float],

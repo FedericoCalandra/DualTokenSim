@@ -19,7 +19,7 @@ class SeignorageModelPurchaseGenerator(PurchaseGenerator):
     """
     
     def __init__(self, token: SeignorageModelToken, wallets_generator: WalletsGenerator, sigma: float = 1.0,
-                 mean: float = 0.0, volume: float = 1000.0, delta_variation: Callable[[float], float] = lambda x: 1 / x,
+                 mean: float = 0.0, volume: float = 100000, delta_variation: Callable[[float], float] = lambda x: 1 / x,
                  threshold: float = 0.05):
         """
         Initializes the PurchaseGeneratorConcrete instance with the provided parameters.

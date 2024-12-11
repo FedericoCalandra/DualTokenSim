@@ -1,22 +1,25 @@
 import unittest
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 from source.liquidity_pools.constant_product_formula import ConstantProductFormula
 from source.liquidity_pools.liquidity_pool import LiquidityPool
 from source.liquidity_pools.simple_virtual_liquidity_pool import SimpleVirtualLiquidityPool
 from source.tokens.algorithmic_stablecoin import AlgorithmicStablecoin
 from source.tokens.collateral_token import CollateralToken
-from source.tokens.generic_token import GenericToken
 from source.arbitrage_optimizer.three_pools_arbitrage_optimizer import ThreePoolsArbitrageOptimizer
+from source.tokens.reference_token import ReferenceToken
 
 
 class TestThreePoolsArbitrageOptimizer(unittest.TestCase):
     def setUp(self):
         # LiquidityPool instances
-        self.stablecoin = AlgorithmicStablecoin("TOKEN_A", initial_supply=100000, initial_price=1.0)
-        self.collateral = CollateralToken("TOKEN_B", initial_supply=100000, initial_price=5.0)
-        self.reference_token = GenericToken("REFERENCE", initial_supply=10 ** 12, initial_price=1.0)
-        self.pool_initial_token_quantity = 10000
-        self.virtual_pool_base_quantity = 1000
+        self.stablecoin = AlgorithmicStablecoin("TOKEN_A", initial_supply=1e6,
+                                                initial_free_supply=1e6/2, initial_price=1.0)
+        self.collateral = CollateralToken("TOKEN_B", initial_supply=1e6,
+                                          initial_free_supply=1e6/2, initial_price=5.0,
+                                          algorithmic_stablecoin=self.stablecoin)
+        self.reference_token = ReferenceToken("REFERENCE")
+        self.pool_initial_token_quantity = 1e6/2
+        self.virtual_pool_base_quantity = 100000000
         self.pools_initialization()
 
     def pools_initialization(self):
@@ -125,19 +128,53 @@ class TestThreePoolsArbitrageOptimizer(unittest.TestCase):
         self.pool2.token_a.price = 5.0
         self.pools_initialization()
 
+        def compute_profit(x):
+            Q_s = self.pool1.quantity_token_a
+            Q_U1 = self.pool1.quantity_token_b
+            Q_v = self.pool2.quantity_token_a
+            Q_U2 = self.pool2.quantity_token_b
+            vQ_s = self.virtual_pool.quantity_token_a
+            vQ_v = self.virtual_pool.quantity_token_b
+
+            mu = Q_v - (Q_v * Q_U2) / (Q_U2 + x)
+            phi = vQ_s - (vQ_s * vQ_v) / (vQ_v + mu)
+            y = Q_U1 - (Q_s * Q_U1) / (Q_s + phi)
+
+            return y - x
+
         self.optimizer.leverage_arbitrage_opportunity()
+        new_stablecoin_price = self.pool1.quantity_token_b / self.pool1.quantity_token_a
+        profit = compute_profit(1)
 
-        self.assertEqual(self.stablecoin.price, 1.0)
+        self.assertLess(new_stablecoin_price, 1.2)
+        self.assertLess(profit, 0)
 
-    def test_leverage_arbitrage_opportunity_type2(self, mock_compute_profit):
+    def test_leverage_arbitrage_opportunity_type2(self):
         """Test leverage_arbitrage_opportunity for Type 2."""
         self.pool1.token_a.price = 0.8
         self.pool2.token_a.price = 5.0
         self.pools_initialization()
 
-        self.optimizer.leverage_arbitrage_opportunity()
+        def compute_profit(x):
+            Q_s = self.pool1.quantity_token_a
+            Q_U1 = self.pool1.quantity_token_b
+            Q_v = self.pool2.quantity_token_a
+            Q_U2 = self.pool2.quantity_token_b
+            vQ_s = self.virtual_pool.quantity_token_a
+            vQ_v = self.virtual_pool.quantity_token_b
 
-        self.assertEqual(self.stablecoin.price, 1.0)
+            mu = Q_s - (Q_s * Q_U1) / (Q_U1 + x)
+            phi = vQ_v - (vQ_s * vQ_v) / (vQ_s + mu)
+            y = Q_U2 - (Q_v * Q_U2) / (Q_v + phi)
+
+            return y - x
+
+        self.optimizer.leverage_arbitrage_opportunity()
+        new_stablecoin_price = self.pool1.quantity_token_b / self.pool1.quantity_token_a
+        profit = compute_profit(1)
+
+        self.assertGreater(new_stablecoin_price, 0.8)
+        self.assertLess(profit, 0)
 
 
 if __name__ == '__main__':

@@ -3,6 +3,9 @@ from source.liquidity_pools.liquidity_pool import LiquidityPool
 from source.liquidity_pools.virtual_liquidity_pool import VirtualLiquidityPool
 from source.arbitrage_optimizer.arbitrage_optimizer import ArbitrageOptimizer
 from source.purchase_generators.purchase_generator import PurchaseGenerator
+from source.tokens.algorithmic_stablecoin import AlgorithmicStablecoin
+from source.tokens.collateral_token import CollateralToken
+from source.tokens.reference_token import ReferenceToken
 
 
 class MarketSimulator:
@@ -45,6 +48,23 @@ class MarketSimulator:
         if not isinstance(arbitrage_optimizer, ArbitrageOptimizer):
             raise ValueError("arbitrage_optimizer must be an instance of ArbitrageOptimizer.")
 
+        self.stablecoin = None
+        self.collateral = None
+
+        for pool in liquidity_pools:
+            if isinstance(pool.token_a, AlgorithmicStablecoin):
+                self.stablecoin = pool.token_a
+            elif isinstance(pool.token_a, CollateralToken):
+                self.collateral = pool.token_a
+            if isinstance(pool.token_b, AlgorithmicStablecoin):
+                self.stablecoin = pool.token_b
+            elif isinstance(pool.token_b, CollateralToken):
+                self.collateral = pool.token_b
+
+        if self.stablecoin is None or self.collateral is None:
+            raise ValueError("AlgorithmicStablecoin and CollateralToken instances are not present inside the provided "
+                             "pools.")
+
         self.liquidity_pools = liquidity_pools
         self.virtual_liquidity_pool = virtual_liquidity_pool
         self.purchase_generators = purchase_generators
@@ -61,7 +81,13 @@ class MarketSimulator:
             None
         """
         for pool, generator in zip(self.liquidity_pools, self.purchase_generators):
-            amount = generator.generate_random_purchase()
+            amount = generator.generate_transaction_amount()
             pool.swap(pool.token_a, amount)
-            pool.token_a.price = pool.quantity_token_b / pool.quantity_token_a
+            if isinstance(pool.token_a, ReferenceToken):
+                pool.token_b.price = pool.quantity_token_b / pool.quantity_token_b
+            elif isinstance(pool.token_b, ReferenceToken):
+                pool.token_a.price = pool.quantity_token_b / pool.quantity_token_a
             self.arbitrage_optimizer.leverage_arbitrage_opportunity()
+
+        self.virtual_liquidity_pool.update_collateral_price(self.collateral.price)
+        self.virtual_liquidity_pool.restore_delta()

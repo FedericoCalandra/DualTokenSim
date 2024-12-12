@@ -99,7 +99,7 @@ class SeignorageModelRandomPurchaseGenerator(PurchaseGenerator):
         if isinstance(self.token, AlgorithmicStablecoin):
             self._compute_mean_variation(self.token)
         else:
-            self._compute_mean_variation(self.token.algorithmic_stablecoin())
+            self._compute_mean_variation(self.token.algorithmic_stablecoin)
         # Compute trade amount in dollar terms.
         dollars_trade_amount = np.random.normal(self.mean, self.variance) * \
               self._compute_volume()

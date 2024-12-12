@@ -4,6 +4,7 @@ from source.liquidity_pools.constant_product_formula import ConstantProductFormu
 from source.liquidity_pools.liquidity_pool import LiquidityPool
 from source.liquidity_pools.simple_virtual_liquidity_pool import SimpleVirtualLiquidityPool
 from source.purchase_generators.seignorage_model_purchase_generator import SeignorageModelPurchaseGenerator
+from source.purchase_generators.seignorage_model_random_purchase_generator import SeignorageModelRandomPurchaseGenerator
 from source.simulations.three_pools_live_simulation import ThreePoolsLiveSimulation
 from source.tokens.algorithmic_stablecoin import AlgorithmicStablecoin
 from source.tokens.collateral_token import CollateralToken
@@ -124,16 +125,16 @@ try:
     collateral_wallets_generator = ExponentialWalletsGenerator(
         probability_associated_to_total_free_token=stablecoin_max_wallet_probability)
 
-    stablecoin_purchase_generator = SeignorageModelPurchaseGenerator(token=stablecoin,
-                                                                     wallets_generator=stablecoin_wallets_generator,
-                                                                     volume=swap_volume,
-                                                                     delta_variation=delta_variation,
-                                                                     threshold=threshold)
-    collateral_purchase_generator = SeignorageModelPurchaseGenerator(token=collateral,
-                                                                     wallets_generator=collateral_wallets_generator,
-                                                                     volume=swap_volume,
-                                                                     delta_variation=delta_variation,
-                                                                     threshold=threshold)
+    stablecoin_purchase_generator = SeignorageModelRandomPurchaseGenerator(token=stablecoin,
+                                                                           wallets_generator=stablecoin_wallets_generator,
+                                                                           volume_variance=swap_volume,
+                                                                           delta_variation=delta_variation,
+                                                                           threshold=threshold)
+    collateral_purchase_generator = SeignorageModelRandomPurchaseGenerator(token=collateral,
+                                                                           wallets_generator=collateral_wallets_generator,
+                                                                           volume_variance=swap_volume,
+                                                                           delta_variation=delta_variation,
+                                                                           threshold=threshold)
 
     live_simulation = ThreePoolsLiveSimulation(stablecoin_token=stablecoin,
                                                collateral_token=collateral,

@@ -47,10 +47,9 @@ class ThreePoolsLiveSimulation(ThreePoolsSimulation):
                         break
 
                     self.step_simulation()
-                    self.number_of_iterations += 1
                     time.sleep(self.delay)
                 else:
-                    time.sleep(self.delay)
+                    time.sleep(1)
 
         self.thread = threading.Thread(target=simulation_loop)
         self.thread.start()
@@ -77,6 +76,7 @@ class ThreePoolsLiveSimulation(ThreePoolsSimulation):
         self.collateral_price_history.append(self.collateral_token.price)
         self.delta_variation_history.append(self.virtual_pool.delta)
         self.market_simulator.execute_random_purchases()
+        self.number_of_iterations += 1
 
         print(f"Stablecoin Price: {self.stablecoin_token.price}, Collateral Price: {self.collateral_token.price}")
 
@@ -100,9 +100,7 @@ class ThreePoolsLiveSimulation(ThreePoolsSimulation):
         """
         Changes the live simulation speed.
         """
-        if speed == "LOW":
-            self.delay = 0.5
-        if speed == "MEDIUM":
-            self.delay = 0.1
-        if speed == "HIGH":
-            self.delay = 0.01
+        if speed < 1 or speed > 600:
+            raise ValueError("Speed must be between 1 and 600.")
+
+        self.delay = 1 / speed

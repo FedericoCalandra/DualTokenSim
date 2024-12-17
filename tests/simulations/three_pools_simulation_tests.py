@@ -1,6 +1,9 @@
 import unittest
 from unittest.mock import MagicMock
+
+from source.liquidity_pools.constant_product_formula import ConstantProductFormula
 from source.liquidity_pools.liquidity_pool import LiquidityPool
+from source.liquidity_pools.simple_virtual_liquidity_pool import SimpleVirtualLiquidityPool
 from source.liquidity_pools.virtual_liquidity_pool import VirtualLiquidityPool
 from source.tokens.algorithmic_stablecoin import AlgorithmicStablecoin
 from source.tokens.collateral_token import CollateralToken
@@ -16,22 +19,33 @@ class TestThreePoolsSimulation(unittest.TestCase):
         Creates mock objects and initializes the simulation instance.
         """
         # Mock tokens
-        self.stablecoin_token = MagicMock(spec=AlgorithmicStablecoin)
+        self.stablecoin_token = AlgorithmicStablecoin(name="AS", initial_supply=10000, initial_free_supply=5000,
+                                                      initial_price=1.0, peg=1.0)
         self.stablecoin_token.price = 1.0
         self.stablecoin_token.supply = 1000000.0
         self.stablecoin_token.free_supply = 800000.0
 
-        self.collateral_token = MagicMock(spec=CollateralToken)
+        self.collateral_token = CollateralToken(name="CT", initial_supply=10000, initial_free_supply=5000,
+                                                initial_price=1.0, algorithmic_stablecoin=self.stablecoin_token)
         self.collateral_token.price = 50.0
         self.collateral_token.supply = 50000.0
         self.collateral_token.free_supply = 40000.0
 
-        self.reference_token = MagicMock(spec=ReferenceToken)
+        self.reference_token = ReferenceToken(name="USD")
 
         # Mock pools
-        self.stablecoin_pool = MagicMock(spec=LiquidityPool)
-        self.collateral_pool = MagicMock(spec=LiquidityPool)
-        self.virtual_pool = MagicMock(spec=VirtualLiquidityPool)
+        self.stablecoin_pool = LiquidityPool(token_a=self.stablecoin_token, token_b=self.reference_token,
+                                             quantity_token_a=5000, quantity_token_b=5000,
+                                             formula=ConstantProductFormula(), fee=0)
+        self.collateral_pool = LiquidityPool(token_a=self.collateral_token, token_b=self.reference_token,
+                                             quantity_token_a=5000, quantity_token_b=500,
+                                             formula=ConstantProductFormula(), fee=0)
+        self.virtual_pool = SimpleVirtualLiquidityPool(stablecoin=self.stablecoin_token,
+                                                       collateral=self.collateral_token,
+                                                       formula=ConstantProductFormula(),
+                                                       stablecoin_base_quantity=1000,
+                                                       fee=0,
+                                                       pool_recovery_period=10)
         self.virtual_pool.delta = 0.0
 
         # Mock purchase generators
@@ -52,7 +66,6 @@ class TestThreePoolsSimulation(unittest.TestCase):
             virtual_pool=self.virtual_pool,
             stablecoin_purchase_generator=self.stablecoin_purchase_generator,
             collateral_purchase_generator=self.collateral_purchase_generator,
-            initial_collateral_token_price=self.initial_collateral_token_price,
             number_of_iterations=self.number_of_iterations
         )
 
@@ -66,7 +79,6 @@ class TestThreePoolsSimulation(unittest.TestCase):
         self.assertIs(self.simulation.stablecoin_pool, self.stablecoin_pool)
         self.assertIs(self.simulation.collateral_pool, self.collateral_pool)
         self.assertIs(self.simulation.virtual_pool, self.virtual_pool)
-        self.assertEqual(self.simulation.initial_collateral_token_price, self.initial_collateral_token_price)
         self.assertEqual(self.simulation.number_of_iterations, self.number_of_iterations)
 
     def test_run_simulation(self):

@@ -6,6 +6,7 @@ from source.purchase_generators.purchase_generator import PurchaseGenerator
 from source.tokens.algorithmic_stablecoin import AlgorithmicStablecoin
 from source.tokens.collateral_token import CollateralToken
 from source.tokens.reference_token import ReferenceToken
+from tqdm import tqdm
 
 
 class ThreePoolsSimulation:
@@ -82,16 +83,17 @@ class ThreePoolsSimulation:
             "virtual_pool_delta": []
         }
 
-        for iteration in range(self.number_of_iterations):
-            print(f"Running simulation iteration {iteration + 1}/{self.number_of_iterations}")
+        with tqdm(total=self.number_of_iterations, desc="Simulation Progress", unit="iter") as pbar:
+            for iteration in range(self.number_of_iterations):
+                simulation_data["stablecoin_price_history"].append(self.stablecoin_token.price)
+                simulation_data["collateral_price_history"].append(self.collateral_token.price)
+                simulation_data["stablecoin_supply_history"].append(self.stablecoin_token.supply)
+                simulation_data["collateral_supply_history"].append(self.collateral_token.supply)
+                simulation_data["stablecoin_free_supply_history"].append(self.stablecoin_token.free_supply)
+                simulation_data["collateral_free_supply_history"].append(self.collateral_token.free_supply)
+                simulation_data["virtual_pool_delta"].append(self.virtual_pool.delta)
 
-            simulation_data["stablecoin_price_history"].append(self.stablecoin_token.price)
-            simulation_data["collateral_price_history"].append(self.collateral_token.price)
-            simulation_data["stablecoin_supply_history"].append(self.stablecoin_token.supply)
-            simulation_data["collateral_supply_history"].append(self.collateral_token.supply)
-            simulation_data["stablecoin_free_supply_history"].append(self.stablecoin_token.free_supply)
-            simulation_data["collateral_free_supply_history"].append(self.collateral_token.free_supply)
-            simulation_data["virtual_pool_delta"].append(self.virtual_pool.delta)
+                self.market_simulator.execute_random_purchases()
 
             if self.collateral_token.supply * self.collateral_token.price < \
                     (self.stablecoin_token.supply * self.stablecoin_token.price) / 10e5:

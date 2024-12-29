@@ -60,6 +60,8 @@ class VirtualLiquidityPool(LiquidityPool, ABC):
         Raises:
             ValueError: If the input token is not recognized or if input_amount is invalid.
         """
+        self.quantity_token_a = self.stablecoin_base_quantity + self.delta
+        self.quantity_token_b = self.stablecoin_base_quantity / self.collateral_price
         output_token, output_amount = super().swap(token, amount)
 
         if token.is_equal(self.token_a):
@@ -67,8 +69,6 @@ class VirtualLiquidityPool(LiquidityPool, ABC):
         else:
             delta_variation = -output_amount
         self.update_delta(delta_variation)
-        token.burn(amount)
-        output_token.mint(output_amount)
 
         return output_token, output_amount
 
@@ -113,3 +113,7 @@ class VirtualLiquidityPool(LiquidityPool, ABC):
             new_price (float): The new price to set for collateral token.
         """
         self.collateral_price = new_price
+
+    def update_supplies(self, token, other_token, amount, other_amount):
+        token.burn(amount)
+        other_token.mint(other_amount)

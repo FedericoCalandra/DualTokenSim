@@ -20,14 +20,11 @@ class TestLiquidityPool(unittest.TestCase):
 
     def test_basic_swap(self):
         """Test a basic swap operation with standard parameters"""
-        # Arrange
         pool = self.create_pool(1000.0, 1000.0, self.standard_fee)
         input_amount = 100.0
 
-        # Act
         output_token, output_amount = pool.swap(self.token_a, input_amount)
 
-        # Assert
         self.assertEqual(output_token, self.token_b)
         self.assertAlmostEqual(pool.quantity_token_a, 1100.0, places=6)
         expected_output = self.formula.apply(
@@ -37,15 +34,12 @@ class TestLiquidityPool(unittest.TestCase):
 
     def test_negative_swap(self):
         """Test removing tokens from the pool using a negative amount"""
-        # Arrange
         pool = self.create_pool(1000.0, 1000.0, self.standard_fee)
         output_amount = -50.0  # Request to remove this amount of output token
 
-        # Act
-        output_token, input_amount = pool.swap(self.token_b, output_amount)
+        input_token, input_amount = pool.swap(self.token_b, output_amount)
 
-        # Assert
-        self.assertEqual(output_token, self.token_b)
+        self.assertEqual(input_token, self.token_a)
         expected_input = self.formula.inverse_apply(
             -output_amount * (1 - self.standard_fee), 1000.0, 1000.0
         )

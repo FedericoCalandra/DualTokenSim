@@ -127,12 +127,12 @@ try:
 
     stablecoin_purchase_generator = SeignorageModelRandomPurchaseGenerator(token=stablecoin,
                                                                            wallets_generator=stablecoin_wallets_generator,
-                                                                           volume_variance=swap_volume,
+                                                                           volatility_variance=swap_volume,
                                                                            delta_variation=delta_variation,
                                                                            threshold=threshold)
     collateral_purchase_generator = SeignorageModelRandomPurchaseGenerator(token=collateral,
                                                                            wallets_generator=collateral_wallets_generator,
-                                                                           volume_variance=swap_volume,
+                                                                           volatility_variance=swap_volume,
                                                                            delta_variation=delta_variation,
                                                                            threshold=threshold)
 

@@ -16,7 +16,7 @@ class PurchaseGenerator(ABC):
                                               for the simulated trade amount.
     """
 
-    def __init__(self, token: Token, wallets_generator: WalletsGenerator):
+    def __init__(self, token: Token):
         """
         Initializes the PurchaseGenerator with a WalletsGenerator.
 
@@ -32,11 +32,8 @@ class PurchaseGenerator(ABC):
         """
         if not isinstance(token, Token):
             raise TypeError("The token argument must be an instance of Token.")
-        if not isinstance(wallets_generator, WalletsGenerator):
-            raise TypeError("The wallets_generator argument must be an instance of WalletsGenerator.")
-        # Initializing attributes.
+
         self.token = token
-        self._wallets_generator = wallets_generator
 
     @abstractmethod
     def generate_transaction_amount(self) -> float:

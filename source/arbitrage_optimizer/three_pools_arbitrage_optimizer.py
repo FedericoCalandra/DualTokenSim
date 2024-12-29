@@ -36,14 +36,18 @@ class ThreePoolsArbitrageOptimizer(ArbitrageOptimizer):
         arbitrage_type, arbitrage_available = self.detect_arbitrage()
 
         if arbitrage_available:
-            if arbitrage_type == 'Type 1':  # Arbitrage Type 1
+            if arbitrage_type == 'Type 1':  # Arbitrage Type 1 (AS price over the peg)
+                if self.liquidity_pools[0].token_a.price < 1:
+                    print("Warning: T1 but price < 1")
                 trade_amount = min(self.compute_max_arbitrage_profit("Type 1"), self.max_arbitrage_input)
 
                 token, x = self.liquidity_pools[1].swap(self.liquidity_pools[1].token_b, trade_amount)
                 token, x = self.virtual_liquidity_pool.swap(token, x)
-                print(self.liquidity_pools[0].swap(token, x))
+                self.liquidity_pools[0].swap(token, x)
 
-            else:  # Arbitrage Type 2
+            else:  # Arbitrage Type 2 (AS price below the peg)
+                if self.liquidity_pools[0].token_a.price > 1:
+                    print("Warning: T2 but price > 1")
                 trade_amount = min(self.compute_max_arbitrage_profit("Type 2"), self.max_arbitrage_input)
 
                 token, x = self.liquidity_pools[0].swap(self.liquidity_pools[0].token_b, trade_amount)
@@ -54,21 +58,21 @@ class ThreePoolsArbitrageOptimizer(ArbitrageOptimizer):
         """
         Identifies whether arbitrage opportunities exist and determines the type.
 
-        Compares the prices in the two liquidity pools and the virtual pool ratio to detect mispricings that can be
-        exploited.
-
         Returns:
             Tuple[str, bool]: A tuple where:
                 - str: The type of arbitrage ('Type 1' or 'Type 2') if an opportunity exists, otherwise ''.
                 - bool: True if an arbitrage opportunity exists, False otherwise.
         """
-        as_price = self.liquidity_pools[0].token_a.price
-        ct_price = self.liquidity_pools[1].token_a.price
-        as_ct_ratio = self.virtual_liquidity_pool.quantity_token_a / self.virtual_liquidity_pool.quantity_token_b
+        t1_profit = self.get_arbitrage_profit("Type 1", 1)
+        t2_profit = self.get_arbitrage_profit("Type 2", 1)
 
-        if as_price * as_ct_ratio > ct_price + self.threshold:
+        if t1_profit > 0:
+            if self.liquidity_pools[0].token_a.price < 1:
+                print("Alert.")
             return 'Type 1', True
-        elif ct_price * (1 / as_ct_ratio) > as_price + self.threshold:
+        elif t2_profit > 0:
+            if self.liquidity_pools[0].token_a.price > 1:
+                print("Alert.")
             return 'Type 2', True
         return '', False
 
@@ -93,13 +97,15 @@ class ThreePoolsArbitrageOptimizer(ArbitrageOptimizer):
             return -self.get_arbitrage_profit(arbitrage_type, rt_input_quantity)
 
         # Set bounds for the optimization
-        bounds = (0, self.max_arbitrage_input)
+        bounds = (1, self.max_arbitrage_input)
 
         # Perform bounded optimization using SciPy
         result = minimize_scalar(negative_yield, bounds=bounds, method='bounded')
 
         if result.success:
-            return result.x  # Optimal input quantity
+            if -result.fun < 0:
+                print("ERROR!!!")
+            return result.x
         else:
             raise ValueError("Optimization failed.")
 
@@ -108,8 +114,8 @@ class ThreePoolsArbitrageOptimizer(ArbitrageOptimizer):
         Calculates the profit from an arbitrage operation based on the input quantity and arbitrage type.
 
         The arbitrage process involves:
-        - Type 1: Buying CT in Pool 2, swapping CT for AS in the virtual pool, and selling AS in Pool 1.
-        - Type 2: Buying AS in Pool 1, swapping AS for CT in the virtual pool, and selling CT in Pool 2.
+        - Type1: Buying CT in Pool 2, swapping CT for AS in the virtual pool, and selling AS in Pool 1.
+        - Type2: Buying AS in Pool 1, swapping AS for CT in the virtual pool, and selling CT in Pool 2.
 
         Args:
             arbitrage_type (str): The arbitrage type ('Type 1' or 'Type 2').
@@ -144,6 +150,7 @@ class ThreePoolsArbitrageOptimizer(ArbitrageOptimizer):
             rt_output_quantity = second_pool.compute_swap_value(y,
                                                                 second_pool.quantity_token_a,
                                                                 second_pool.quantity_token_b)
+
             return rt_output_quantity - rt_input_quantity
 
         return 0

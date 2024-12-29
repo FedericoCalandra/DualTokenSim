@@ -16,8 +16,11 @@ class ThreePoolsSimulation:
     def __init__(self, stablecoin_token: AlgorithmicStablecoin,
                  collateral_token: CollateralToken,
                  reference_token: ReferenceToken,
-                 stablecoin_pool: LiquidityPool, collateral_pool: LiquidityPool, virtual_pool: VirtualLiquidityPool,
-                 stablecoin_purchase_generator: PurchaseGenerator, collateral_purchase_generator: PurchaseGenerator,
+                 stablecoin_pool: LiquidityPool,
+                 collateral_pool: LiquidityPool,
+                 virtual_pool: VirtualLiquidityPool,
+                 stablecoin_purchase_generator: PurchaseGenerator,
+                 collateral_purchase_generator: PurchaseGenerator,
                  number_of_iterations: int):
         """
         Initializes the AlgorithmicStablecoinSimulation instance with the necessary components.
@@ -89,6 +92,14 @@ class ThreePoolsSimulation:
             simulation_data["stablecoin_free_supply_history"].append(self.stablecoin_token.free_supply)
             simulation_data["collateral_free_supply_history"].append(self.collateral_token.free_supply)
             simulation_data["virtual_pool_delta"].append(self.virtual_pool.delta)
+
+            if self.collateral_token.supply * self.collateral_token.price < \
+                    (self.stablecoin_token.supply * self.stablecoin_token.price) / 10e5:
+                print(
+                    "Simulation terminated early: The collateral capitalization is insufficient to support "
+                    "the stablecoin system. The algorithmic stablecoin is considered collapsed."
+                )
+                break
 
             self.market_simulator.execute_random_purchases()
 

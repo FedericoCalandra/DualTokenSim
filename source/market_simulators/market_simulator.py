@@ -1,4 +1,5 @@
 from typing import List
+from source.exceptions.stablecoin_collapse_exception import StablecoinCollapseException
 from source.liquidity_pools.liquidity_pool import LiquidityPool
 from source.liquidity_pools.virtual_liquidity_pool import VirtualLiquidityPool
 from source.arbitrage_optimizer.arbitrage_optimizer import ArbitrageOptimizer
@@ -83,11 +84,16 @@ class MarketSimulator:
         for pool, generator in zip(self.liquidity_pools, self.purchase_generators):
             amount = generator.generate_transaction_amount()
             pool.swap(pool.token_a, amount)
+
             if isinstance(pool.token_a, ReferenceToken):
                 pool.token_b.price = pool.quantity_token_b / pool.quantity_token_b
             elif isinstance(pool.token_b, ReferenceToken):
                 pool.token_a.price = pool.quantity_token_b / pool.quantity_token_a
-            self.arbitrage_optimizer.leverage_arbitrage_opportunity()
+
+        if self.collateral.supply * self.collateral.price < (self.stablecoin.supply * self.stablecoin.price) / 10e6:
+            raise StablecoinCollapseException()
+
+        self.arbitrage_optimizer.leverage_arbitrage_opportunity()
 
         self.virtual_liquidity_pool.update_collateral_price(self.collateral.price)
-        self.virtual_liquidity_pool.restore_delta()
+        self.virtual_liquidity_pool.perform_pool_replenishing()

@@ -90,6 +90,9 @@ class Token(ABC):
         # Calculate the new free supply based on the difference in supply.
         new_free_supply = self._free_supply + (new_supply - self._supply)
 
+        if 0.001 > new_free_supply > -0.001:
+            new_free_supply = 0
+
         if new_free_supply < 0:
             raise ValueError("Reduction in supply cannot result in negative free supply.")
 
@@ -110,6 +113,8 @@ class Token(ABC):
         Raises:
             ValueError: If value is greater than supply or negative.
         """
+        if 0.01 > new_free_supply > -0.01:
+            new_free_supply = 0
         if not isinstance(new_free_supply, (float, int)) or new_free_supply < 0:
             raise ValueError("Free supply must be a positive number.")
         if new_free_supply > self._supply:

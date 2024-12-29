@@ -56,32 +56,49 @@ class LiquidityPool:
             raise ValueError("Invalid input token for this liquidity pool.")
 
         if token.is_equal(self.token_a):
-            input_reserve, output_reserve = self.quantity_token_a, self.quantity_token_b
-            input_token, output_token = self.token_a, self.token_b
+            if amount >= 0:
+                input_reserve, output_reserve = self.quantity_token_a, self.quantity_token_b
+            else:
+                input_reserve, output_reserve = self.quantity_token_b, self.quantity_token_a
+            other_token = self.token_b
         else:
-            input_reserve, output_reserve = self.quantity_token_b, self.quantity_token_a
-            input_token, output_token = self.token_b, self.token_a
+            if amount >= 0:
+                input_reserve, output_reserve = self.quantity_token_b, self.quantity_token_a
+            else:
+                input_reserve, output_reserve = self.quantity_token_a, self.quantity_token_b
+            other_token = self.token_a
 
         if amount > 0:
-            output_amount = self.compute_swap_value(amount, input_reserve, output_reserve)
-            input_reserve += amount
+            input_amount = amount
+            output_amount = self.compute_swap_value(input_amount, input_reserve, output_reserve)
+            input_reserve += input_amount
             output_reserve -= output_amount
-            input_token.free_supply = input_token.free_supply - amount
-            output_token.free_supply = output_token.free_supply + output_amount
-        else:
+            other_amount = output_amount
+            if token.is_equal(self.token_a):
+                self.update_pool_quantities(input_reserve, output_reserve)
+            else:
+                self.update_pool_quantities(output_reserve, input_reserve)
+        elif amount < 0:
             output_amount = -amount
             input_amount = self.compute_inverse_swap_value(output_amount, input_reserve, output_reserve)
-            input_reserve -= input_amount
-            output_reserve += output_amount
-            input_token.free_supply = input_token.free_supply + input_amount
-            output_token.free_supply = output_token.free_supply - output_amount
-
-        if input_token.is_equal(self.token_a):
-            self.quantity_token_a, self.quantity_token_b = input_reserve, output_reserve
+            input_reserve += input_amount
+            output_reserve -= output_amount
+            other_amount = input_amount
+            if token.is_equal(self.token_a):
+                self.update_pool_quantities(output_reserve, input_reserve)
+            else:
+                self.update_pool_quantities(input_reserve, output_reserve)
         else:
-            self.quantity_token_b, self.quantity_token_a = input_reserve, output_reserve
+            other_amount = 0
 
-        return output_token, output_amount
+        self.update_supplies(token, other_token, amount, other_amount)
+
+        return other_token, other_amount
+
+    def update_pool_quantities(self, new_quantity_token_a, new_quantity_token_b):
+        if new_quantity_token_a < 0 or new_quantity_token_b < 0:
+            raise ValueError("Token quantity in the pool cannot be negative.")
+        self.quantity_token_a, self.quantity_token_b = new_quantity_token_a, new_quantity_token_b
 
     def compute_swap_value(self, input_quantity, input_reserve, output_reserve):
         """
@@ -114,3 +131,8 @@ class LiquidityPool:
         effective_input = input_amount / (1 - self.fee)
 
         return effective_input
+
+    def update_supplies(self, token, other_token, amount, other_amount):
+        if amount != 0:
+            token.free_supply -= amount
+            other_token.free_supply += other_amount * (amount / abs(amount))

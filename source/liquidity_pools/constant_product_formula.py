@@ -33,7 +33,7 @@ class ConstantProductFormula(Formula):
         Raises:
             ValueError: If any of the arguments are not positive or if the output_quantity exceeds the output_reserve.
         """
-        if input_quantity <= 0:
+        if input_quantity < 0:
             raise ValueError("Input quantity must be positive.")
         if input_reserve <= 0:
             raise ValueError("Input reserve must be positive.")
@@ -74,6 +74,8 @@ class ConstantProductFormula(Formula):
             raise ValueError("Input reserve must be positive.")
         if output_reserve <= 0:
             raise ValueError("Output reserve must be positive.")
+        if output_reserve - output_quantity <= 0:
+            raise ValueError("Output reserve must be positive after swapping.")
 
         intput_amount = (input_reserve * output_quantity) / (output_reserve - output_quantity)
         return intput_amount

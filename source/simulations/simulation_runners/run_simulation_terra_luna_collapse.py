@@ -1,11 +1,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
-
 from source.liquidity_pools.constant_product_formula import ConstantProductFormula
 from source.liquidity_pools.liquidity_pool import LiquidityPool
 from source.liquidity_pools.simple_virtual_liquidity_pool import SimpleVirtualLiquidityPool
 from source.purchase_generators.seignorage_model_purchase_generator import SeignorageModelPurchaseGenerator
-from source.purchase_generators.seignorage_model_random_purchase_generator import SeignorageModelRandomPurchaseGenerator
 from source.tokens.algorithmic_stablecoin import AlgorithmicStablecoin
 from source.tokens.collateral_token import CollateralToken
 from source.tokens.reference_token import ReferenceToken
@@ -20,16 +18,16 @@ def calculate_volatility_array(volumes_daily, total_iterations_per_day, sqrt_2_p
 
 
 try:
-    iterations_per_day = 14400                       # number of blocks produced in 1 day (one every 6 seconds)
+    iterations_per_day = 14400                     # number of blocks produced in 1 day (one every 6 seconds)
 
     stablecoin_initial_price = 0.9997794183
     stablecoin_initial_supply = 18_490_738_908
-    stablecoin_initial_free_supply = stablecoin_initial_supply * 0.5
+    stablecoin_initial_free_supply = stablecoin_initial_supply * 0.7
     stablecoin_pool_fee = 0.03
 
     collateral_initial_price = 78.34409302
     collateral_initial_supply = 345_341_994.7
-    collateral_initial_free_supply = collateral_initial_supply * 0.5
+    collateral_initial_free_supply = collateral_initial_supply * 0.7
     collateral_pool_fee = 0.03
 
     vlp_stablecoin_base_quantity = 6.7215e7
@@ -58,8 +56,9 @@ try:
     volatility_array_stablecoin = calculate_volatility_array(volumes_daily_stablecoin, iterations_per_day)
     volatility_array_collateral = calculate_volatility_array(volumes_daily_collateral, iterations_per_day)
 
-    print(len(volatility_array_stablecoin))
-    print(len(volatility_array_collateral))
+    amount_mean_array_stablecoin = np.zeros(number_of_iterations)
+    amount_mean_array_stablecoin[(8 * iterations_per_day):] = 0.2
+    amount_mean_array_stablecoin = amount_mean_array_stablecoin.tolist()
 
     cpf = ConstantProductFormula()
 
@@ -106,6 +105,7 @@ try:
 
     stablecoin_purchase_generator = SeignorageModelPurchaseGenerator(token=stablecoin,
                                                                      volatility=volatility_array_stablecoin,
+                                                                     amount_mean_variation=amount_mean_array_stablecoin,
                                                                      delta_variation=lambda x: 1 / x - 1,
                                                                      threshold=0.05,
                                                                      pool_fee=stablecoin_pool_fee)

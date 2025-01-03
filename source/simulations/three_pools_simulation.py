@@ -95,14 +95,14 @@ class ThreePoolsSimulation:
 
                 self.market_simulator.execute_random_purchases()
 
-            if self.collateral_token.supply * self.collateral_token.price < \
-                    (self.stablecoin_token.supply * self.stablecoin_token.price) / 10e5:
-                print(
-                    "Simulation terminated early: The collateral capitalization is insufficient to support "
-                    "the stablecoin system. The algorithmic stablecoin is considered collapsed."
-                )
-                break
+                pbar.update(1)
 
-            self.market_simulator.execute_random_purchases()
+                if self.collateral_token.supply * self.collateral_token.price < \
+                        (self.stablecoin_token.supply * self.stablecoin_token.price) / 10e5:
+                    print(
+                        "Simulation terminated early: The collateral capitalization is insufficient to support "
+                        "the stablecoin system. The algorithmic stablecoin is considered collapsed."
+                    )
+                    break
 
         return simulation_data

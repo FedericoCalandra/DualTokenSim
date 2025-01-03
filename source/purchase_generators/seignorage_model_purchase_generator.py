@@ -4,10 +4,10 @@ from source.tokens.algorithmic_stablecoin import AlgorithmicStablecoin
 from source.tokens.collateral_token import CollateralToken
 from source.tokens.seignorage_model_token import SeignorageModelToken
 from source.purchase_generators.purchase_generator import PurchaseGenerator
-import numpy as np
 
 
 class SeignorageModelPurchaseGenerator(PurchaseGenerator):
+
     """
     A concrete implementation of the PurchaseGenerator abstract class for simulating
     random trade events within a seigniorage model. This generator adjusts the
@@ -22,12 +22,12 @@ class SeignorageModelPurchaseGenerator(PurchaseGenerator):
         threshold (float): Threshold for determining market stability or panic conditions.
         pool_fee (float): Fee applied to transactions, influencing the amount distribution.
     """
-
     def __init__(self,
                  token: SeignorageModelToken,
                  volatility: list[float],
                  amount_variance: float = 1.0,
                  amount_mean: float = 0.0,
+                 amount_mean_variation: list = None,
                  delta_variation: Callable[[float], float] = lambda x: 1 / x,
                  threshold: float = 0.05,
                  pool_fee: float = 0.0
@@ -53,6 +53,8 @@ class SeignorageModelPurchaseGenerator(PurchaseGenerator):
             ValueError: If `delta_variation` is not callable.
         """
         super().__init__(token)
+        if amount_mean_variation is None:
+            amount_mean_variation = [0.0]
         if not isinstance(volatility, list):
             raise TypeError("Volatility must be a list!")
         if not isinstance(token, (AlgorithmicStablecoin, CollateralToken)):
@@ -69,8 +71,9 @@ class SeignorageModelPurchaseGenerator(PurchaseGenerator):
 
         self.volatility = volatility
         self.amount_variance = float(amount_variance)
-        self.amount_mean = float(amount_mean)
         self._initial_mean = float(amount_mean)
+        self.amount_mean = self._initial_mean
+        self.amount_mean_variation = amount_mean_variation
         self.delta_variation = delta_variation
         self.threshold = float(threshold)
         self.pool_fee = float(pool_fee)
@@ -99,7 +102,8 @@ class SeignorageModelPurchaseGenerator(PurchaseGenerator):
 
         min_value = - (self.token.supply - self.token.free_supply) * self.token.price / volatility
         max_value = self.token.free_supply * self.token.price / volatility
-        a, b = (min_value - self.amount_mean) / self.amount_variance, (max_value - self.amount_mean) / self.amount_variance
+        a, b = ((min_value - self.amount_mean) / self.amount_variance, (max_value - self.amount_mean) /
+                self.amount_variance)
 
         dollars_trade_amount = truncnorm.rvs(a, b, loc=self.amount_mean, scale=self.amount_variance) * volatility
         trade_amount = dollars_trade_amount / self.token.price
@@ -124,7 +128,10 @@ class SeignorageModelPurchaseGenerator(PurchaseGenerator):
             raise TypeError("Input must be an instance of AlgorithmicStablecoin.")
         # Market stability
         if stablecoin.price > stablecoin.peg - self.threshold:
-            self.amount_mean = 0
+            if len(self.amount_mean_variation) > 0:
+                self.amount_mean = self.amount_mean_variation.pop()
+            else:
+                self.amount_mean = self._initial_mean
         else:
             # Market panic behaviour
             self.amount_mean = self._initial_mean + self.delta_variation(stablecoin.price)

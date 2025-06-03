@@ -3,6 +3,7 @@ DualTokenSim is a Python-based simulator designed to study the behavior of dual-
 
 This simulator offers a controlled environment to analyze such failures and explore improvements in design and resilience mechanisms.
 
+
 # ✨ Key Features
 🔁 Simulation of automated market makers and user trading behavior
 
@@ -14,14 +15,15 @@ This simulator offers a controlled environment to analyze such failures and expl
 
 📊 Tools for quantitative stability analysis (e.g. MSE vs. peg)
 
+
 # 🔬 Research Context
 DualTokenSim is part of ongoing research to better understand and design resilient algorithmic stablecoins. It supports the analysis of new dual-token protocol proposals by providing a testbed for:
 
-Scenario-based design evaluation
+- Scenario-based design evaluation
 
-Early detection of instability risks
+- Early detection of instability risks
 
-Fine-tuning stabilization mechanisms before mainnet deployment
+- Fine-tuning stabilization mechanisms before mainnet deployment
 
 One of the most promising applications of DualTokenSim is its ability to test new dual-token AS protocols under a wide range of market scenarios. By simulating stress conditions and analyzing the performance of proposed designs, developers can identify weaknesses and refine stabilization mechanisms before deploying them in live markets.
 
@@ -29,13 +31,13 @@ One of the most promising applications of DualTokenSim is its ability to test ne
 # 🧪 Use Case: Terra-Luna Collapse
 DualTokenSim successfully replicates the Terra-Luna collapse dynamics, including:
 
-Depegging triggers
+- Depegging triggers
 
-Exponential LUNA minting
+- Exponential LUNA minting
 
-AMM pricing behavior during panic
+- Users' behavior during panic
 
-Liquidity drain and system death spiral
+- System death spiral
 
 # 📚 Acknowledgments
 This work is supported by:
@@ -51,9 +53,10 @@ Funding from the PNRR — "Piano Nazionale di Ripresa e Resilienza", as per D.M.
 # Future Work
 
 Key areas for enhancement include:
-Model refinement, based on incorporating more market factors and different arbitrage dynamics for greater realism.
-Validation and improvement proposals, which serve as a testbed for evaluating modifications to the VLP mechanism and new stabilization techniques.
-Automating parameter fine-tuning, by using machine learning or optimization algorithms for more accurate and efficient parameter calibration.
-Quantitative stability evaluation using the Mean Squared Error (MSE) between the stablecoin price and its peg in balanced market scenarios.
-Stress-testing under extreme market conditions, including network congestion, flash crashes, and liquidity shocks.
+
+- Model refinement, based on incorporating more market factors and different arbitrage dynamics for greater realism.
+- Validation and improvement proposals, which serve as a testbed for evaluating modifications to the VLP mechanism and new stabilization techniques.
+- Automating parameter fine-tuning, by using machine learning or optimization algorithms for more accurate and efficient parameter calibration.
+- Quantitative stability evaluation using the Mean Squared Error (MSE) between the stablecoin price and its peg in balanced market scenarios.
+- Stress-testing under extreme market conditions, including network congestion, flash crashes, and liquidity shocks.
 

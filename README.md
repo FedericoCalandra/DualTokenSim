@@ -1,5 +1,5 @@
 # DualTokenSim
-DualTokenSim is a Python-based simulator designed to study the behavior of dual-token algorithmic stablecoins, with a special focus on modeling normal and stress market conditions. These types of stablecoins aim to maintain a peg without centralized collateral—yet they can be highly susceptible to depegging, as illustrated by the 2022 Terra-Luna collapse (over $50B in market cap lost in days).
+DualTokenSim is a Python-based simulator designed to study the behavior of dual-token algorithmic stablecoins, with a special focus on modeling normal and stress market conditions. These types of stablecoins aim to maintain a peg without centralized collateral. Yet they can be highly susceptible to depegging, as illustrated by the 2022 Terra-Luna collapse (over $50B in market cap lost in days).
 
 This simulator offers a controlled environment to analyze such failures and explore improvements in design and resilience mechanisms.
 

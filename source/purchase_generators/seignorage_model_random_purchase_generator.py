@@ -40,7 +40,7 @@ class SeignorageModelRandomPurchaseGenerator(SeignorageModelPurchaseGenerator):
             pool_fee (float, optional): Fee applied to transactions. Default is 0.0.
         """
         self.volatility = [float(initial_volatility)]
-        super().__init__(token, self.volatility, amount_variance, amount_mean, delta_variation, threshold, pool_fee)
+        super().__init__(token, self.volatility, amount_variance, amount_mean, [0], delta_variation, threshold, pool_fee)
 
         self.volatility_variance = float(volatility_variance)
 

@@ -37,8 +37,6 @@ class ThreePoolsArbitrageOptimizer(ArbitrageOptimizer):
 
         if arbitrage_available:
             if arbitrage_type == 'Type 1':  # Arbitrage Type 1 (AS price over the peg)
-                if self.liquidity_pools[0].token_a.price < 1:
-                    print("Warning: T1 but price < 1")
                 trade_amount = min(self.compute_max_arbitrage_profit("Type 1"), self.max_arbitrage_input)
 
                 token, x = self.liquidity_pools[1].swap(self.liquidity_pools[1].token_b, trade_amount)
@@ -46,8 +44,6 @@ class ThreePoolsArbitrageOptimizer(ArbitrageOptimizer):
                 self.liquidity_pools[0].swap(token, x)
 
             else:  # Arbitrage Type 2 (AS price below the peg)
-                if self.liquidity_pools[0].token_a.price > 1:
-                    print("Warning: T2 but price > 1")
                 trade_amount = min(self.compute_max_arbitrage_profit("Type 2"), self.max_arbitrage_input)
 
                 token, x = self.liquidity_pools[0].swap(self.liquidity_pools[0].token_b, trade_amount)

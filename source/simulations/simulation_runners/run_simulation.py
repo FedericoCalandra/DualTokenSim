@@ -10,7 +10,7 @@ from source.simulations.three_pools_simulation import ThreePoolsSimulation
 
 
 try:
-    number_of_iterations = 200000
+    number_of_iterations = 2000
 
     stablecoin_initial_price = 1.0
     stablecoin_initial_supply = 10 ** 6

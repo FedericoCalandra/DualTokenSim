@@ -63,12 +63,8 @@ class ThreePoolsArbitrageOptimizer(ArbitrageOptimizer):
         t2_profit = self.get_arbitrage_profit("Type 2", 1)
 
         if t1_profit > 0:
-            if self.liquidity_pools[0].token_a.price < 1:
-                print("Alert.")
             return 'Type 1', True
         elif t2_profit > 0:
-            if self.liquidity_pools[0].token_a.price > 1:
-                print("Alert.")
             return 'Type 2', True
         return '', False
 
